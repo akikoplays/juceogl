@@ -39,6 +39,7 @@
 		3C8621EC1F1FCE183B421603 = {isa = PBXBuildFile; fileRef = B29AA790767C9D5B41BDE7D3; };
 		0250BAF1E28DB9AB9BC5BA71 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Main.cpp; path = ../../Source/Main.cpp; sourceTree = "SOURCE_ROOT"; };
 		0F6FB7D8064EA29C5E929D70 = {isa = PBXFileReference; lastKnownFileType = file; name = "juce_audio_devices"; path = "../../../../../Downloads/JUCE/modules/juce_audio_devices"; sourceTree = "SOURCE_ROOT"; };
+		163C79A526452AB5373E70C8 = {isa = PBXFileReference; lastKnownFileType = image.png; name = tools.png; path = ../../Source/Resources/tools.png; sourceTree = "SOURCE_ROOT"; };
 		2047ECEA6B06B39A33714034 = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = NewProject.app; sourceTree = "BUILT_PRODUCTS_DIR"; };
 		2140DD9479F3643E5A02AD0F = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = BinaryData.h; path = ../../JuceLibraryCode/BinaryData.h; sourceTree = "SOURCE_ROOT"; };
 		2250678DF725E694207B9047 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = MainComponent.cpp; path = ../../Source/MainComponent.cpp; sourceTree = "SOURCE_ROOT"; };
@@ -91,6 +92,7 @@
 		0BDA62C7A11A7EB676EF3A23 = {isa = PBXGroup; children = (
 					31193EE39C20805BA2FD48FA,
 					31181F7F97BE76A445D72050,
+					163C79A526452AB5373E70C8,
 					2A09D7077E17FA580D0C595A, ); name = Resources; sourceTree = "<group>"; };
 		94B308551A70CCC4CDAED98C = {isa = PBXGroup; children = (
 					0BDA62C7A11A7EB676EF3A23,

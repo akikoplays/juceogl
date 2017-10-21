@@ -12,6 +12,113 @@
 
 using namespace std;
 
+class ToolbarComponent : public Component
+{
+public:
+    ComponentAnimator animator;
+    bool hidden;
+    Image toolsIcon;
+    
+    ToolbarComponent()
+    {
+        setBounds(0, 0, 800, 128);
+        toolsIcon = ImageCache::getFromMemory (BinaryData::tools_png,
+                                               BinaryData::tools_pngSize).rescaled(800, 128);
+
+    }
+    
+    bool isBusy()
+    {
+        cout << "toolbar is busy: " << animator.isAnimating() << endl;
+        return animator.isAnimating();
+    }
+    
+    void hide()
+    {
+        Rectangle<int>r1 = getLocalBounds();
+        Rectangle<int>r2 = getBounds();
+        Rectangle<int> r(0, getParentComponent()->getHeight() - 20,
+                            getWidth(), getHeight());
+        animator.animateComponent (this,
+                                   r,
+                                   0.0f,
+                                   100,
+                                   false,
+                                   0.0,
+                                   0.0);
+        hidden = true;
+    }
+    
+    void show()
+    {
+        Rectangle<int> r(0, getParentComponent()->getHeight() - 100,
+                            getWidth(), getHeight());
+        animator.animateComponent (this,
+                                   r,
+                                   1.0f,
+                                   100,
+                                   false,
+                                   0.0,
+                                   0.0);
+        hidden = false;
+    }
+    
+    void paint (Graphics& g) override
+    {
+        Rectangle<float> area (getLocalBounds().toFloat().reduced (2.0f));
+        g.setColour (Colours::orange);
+        g.drawRoundedRectangle (area, 10.0f, 2.0f);
+        g.drawImageAt(toolsIcon, area.getX(), area.getY());
+    }
+    
+    void resized() override
+    {
+        // Just set the limits of our constrainer so that we don't drag ourselves off the screen
+    }
+    
+    void mouseEnter (const MouseEvent& e) override
+    {
+        cout << "Mouse entered toolbar zone" << endl;
+        show();
+    }
+    
+    void mouseExit (const MouseEvent& e) override
+    {
+        cout << "Mouse exited toolbar zone" << endl;
+        hide();
+    }
+    
+    void mouseDown (const MouseEvent& e) override
+    {
+        // Prepares our dragger to drag this Component
+        cout << "Mouse down!" << endl;
+    }
+    
+    void mouseDrag (const MouseEvent& e) override
+    {
+        // Moves this Component according to the mouse drag event and applies our constraints to it
+    }
+
+    Button* createButton()
+    {
+        Image toolsIcon = ImageCache::getFromMemory (BinaryData::tools_png,
+                                                    BinaryData::tools_pngSize)
+        .rescaled (800, 128);
+        
+        ImageButton* b = new ImageButton ("ImageButton");
+        
+        b->setImages (true, true, true,
+                      toolsIcon, 1.0f, Colours::transparentBlack,
+                      toolsIcon, 1.0f, Colours::white,
+                      toolsIcon, 1.0f, Colours::white,
+                      0.5f);
+        
+        return b;
+    }
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ToolbarComponent)
+
+};
 
 //==============================================================================
 /*
@@ -19,7 +126,8 @@ using namespace std;
  your controls and content.
  */
 class MainContentComponent : public OpenGLAppComponent,
-                            private ComboBox::Listener
+                            private ComboBox::Listener,
+                            private Button::Listener
 {
 public:
     //==============================================================================
@@ -41,7 +149,7 @@ public:
         addAndMakeVisible (presetBox);
         presetBox.addListener (this);
 
-        // todo: add shaders to user selection droplist
+        // add shaders to user selection droplist
         Array<ShaderPreset> presets (getPresets());
         StringArray presetNames;
         for (int i = 0; i < presets.size(); ++i){
@@ -53,11 +161,16 @@ public:
         presetLabel.setText ("Shader Preset:", dontSendNotification);
         presetLabel.attachToComponent (&presetBox, true);
 
-        // todo: texture manager
+        // texture manager
         addAndMakeVisible (textureLabel);
         textureLabel.setText ("Texture:", dontSendNotification);
         textureLabel.attachToComponent (&textureBox, true);
         
+        // toolbar appears on bottom
+        addAndMakeVisible(toolbar);
+        toolbar.setBounds(getLocalBounds().getWidth()/2 - toolbar.getWidth()/2, getLocalBounds().getHeight() - toolbar.getHeight(),
+                          toolbar.getWidth(), toolbar.getHeight());
+        toolbar.hide();
         lookAndFeelChanged();
     }
     
@@ -141,6 +254,34 @@ public:
     {
     }
     
+    void resized() override
+    {
+        // This is called when the MainContentComponent is resized.
+        // If you add any child components, this is where you should
+        // update their positions.
+        Rectangle<int> area (getLocalBounds().reduced (4));
+        Rectangle<int> top (area.removeFromBottom(40));
+        statusLabel.setBounds (top);
+        
+        Rectangle<int> shaderArea (area.removeFromBottom (64));
+        Rectangle<int> presets (shaderArea.removeFromTop (25));
+        presets.removeFromLeft (100);
+        presetBox.setBounds (presets.removeFromLeft (150));
+        presets.removeFromLeft (100);
+        textureBox.setBounds (presets);
+        
+//        toolbar.setBounds(getLocalBounds().getWidth()/2 - toolbar.getWidth()/2, getLocalBounds().getHeight() + toolbar.getHeight(),
+//                          toolbar.getWidth(), 128);
+        
+        // Must set for mouse interactions
+        draggableOrientation.setViewport (getLocalBounds());
+    }
+
+    void buttonClicked (Button*) override
+    {
+        
+    }
+
     Matrix3D<float> getProjectionMatrix() const
     {
         float w = 1.0f / (zoom + 0.1f);
@@ -150,7 +291,7 @@ public:
     
     Matrix3D<float> getViewMatrix() const
     {
-        Matrix3D<float> viewMatrix = draggableOrientation.getRotationMatrix() * Vector3D<float> (0.0f, 1.0f, -10.0f);
+        Matrix3D<float> viewMatrix = draggableOrientation.getRotationMatrix() * Vector3D<float> (0.0f, 0.0f, -10.0f);
         Matrix3D<float> rotationMatrix = viewMatrix.rotated (Vector3D<float> (rotation, rotation, -0.3f));
         return rotationMatrix * viewMatrix;
     }
@@ -207,6 +348,7 @@ public:
         openGLContext.extensions.glBindBuffer (GL_ARRAY_BUFFER, 0);
         openGLContext.extensions.glBindBuffer (GL_ELEMENT_ARRAY_BUFFER, 0);
         
+        drawBackground2DStuff(desktopScale);
     }
     
     void paint (Graphics& g) override
@@ -221,27 +363,20 @@ public:
         g.drawLine (20, 50, 170, 50);
     }
     
-    void resized() override
+    void mouseMove (const MouseEvent& e) override
     {
-        // This is called when the MainContentComponent is resized.
-        // If you add any child components, this is where you should
-        // update their positions.
-        Rectangle<int> area (getLocalBounds().reduced (4));
-        Rectangle<int> top (area.removeFromTop (75));
-        top.removeFromRight (70);
-        statusLabel.setBounds (top);
-        
-        Rectangle<int> shaderArea (area.removeFromBottom (area.getHeight() / 2));
-        Rectangle<int> presets (shaderArea.removeFromTop (25));
-        presets.removeFromLeft (100);
-        presetBox.setBounds (presets.removeFromLeft (150));
-        presets.removeFromLeft (100);
-        textureBox.setBounds (presets);
-        
-        shaderArea.removeFromTop (4);
-        
-        // Must set for mouse interactions
-        draggableOrientation.setViewport (getLocalBounds());
+//        if (e.getPosition().getY() > getLocalBounds().getHeight() - toolbar.getHeight() - 50){
+//            cout << "Mouse entered toolbar hot zone" << endl;
+//            if (toolbar.isBusy()) {
+//                cout << "ops, busy" << endl;
+//            } else {
+//                cout << "not busy " << endl;
+//                if (toolbar.hidden)
+//                    toolbar.show();
+//                else
+//                    toolbar.hide();
+//            }
+//        }
     }
     
     void mouseDown (const MouseEvent& e) override
@@ -277,6 +412,38 @@ public:
         textureBox.addSeparator();
         textureBox.addItem ("Load from a file...", 1000);
 #endif
+    }
+
+    void drawBackground2DStuff (float desktopScale)
+    {
+        // Create an OpenGLGraphicsContext that will draw into this GL window..
+        ScopedPointer<LowLevelGraphicsContext> glRenderer (createOpenGLGraphicsContext (openGLContext,
+                                                                                        roundToInt (desktopScale * getWidth()),
+                                                                                        roundToInt (desktopScale * getHeight())));
+        
+        if (glRenderer != nullptr)
+        {
+            Graphics g (*glRenderer);
+            g.addTransform (AffineTransform::scale (desktopScale));
+            
+            float size = 0.25f;
+            
+            // This stuff just creates a spinning star shape and fills it..
+            Path p;
+            p.addStar (Point<float> (getWidth() * 0.5f,
+                                     getHeight() * 0.5f), 7,
+                       getHeight() * size * 0.5f,
+                       getHeight() * size,
+                       0.5f);
+            
+            float hue = 1.0f;
+            
+            g.setGradientFill (ColourGradient (Colours::green.withRotatedHue (hue).withAlpha (0.8f),
+                                               0, 0,
+                                               Colours::red.withRotatedHue (hue).withAlpha (0.5f),
+                                               0, (float) getHeight(), false));
+            g.fillPath (p);
+        }
     }
 
 private:
@@ -964,13 +1131,14 @@ private:
     Draggable3DOrientation draggableOrientation;
     float zoom;
     float rotation;
-    
+    ToolbarComponent toolbar;
     ComboBox presetBox, textureBox;
     Label presetLabel, textureLabel, statusLabel;
     OwnedArray<DemoTexture> textures;
     DemoTexture *textureToUse;
     OpenGLTexture texture;
-
+    ComponentAnimator toolbarAnimator;
+    
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainContentComponent)
 };
 
