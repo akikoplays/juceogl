@@ -22,8 +22,8 @@ public:
     ToolbarComponent()
     {
         setBounds(0, 0, 800, 128);
-        toolsIcon = ImageCache::getFromMemory (BinaryData::tools_png,
-                                               BinaryData::tools_pngSize).rescaled(800, 128);
+        toolsIcon = ImageCache::getFromMemory (BinaryData::toolbar_png,
+                                               BinaryData::toolbar_pngSize).rescaled(800, 120);
 
     }
     
@@ -41,7 +41,7 @@ public:
                             getWidth(), getHeight());
         animator.animateComponent (this,
                                    r,
-                                   0.0f,
+                                   1.0f,
                                    100,
                                    false,
                                    0.0,
@@ -51,7 +51,7 @@ public:
     
     void show()
     {
-        Rectangle<int> r(0, getParentComponent()->getHeight() - 100,
+        Rectangle<int> r(0, getParentComponent()->getHeight() - 120,
                             getWidth(), getHeight());
         animator.animateComponent (this,
                                    r,
@@ -65,15 +65,17 @@ public:
     
     void paint (Graphics& g) override
     {
-        Rectangle<float> area (getLocalBounds().toFloat().reduced (2.0f));
-        g.setColour (Colours::orange);
-        g.drawRoundedRectangle (area, 10.0f, 2.0f);
+//        Rectangle<float> area (getLocalBounds().toFloat().reduced (2.0f));
+//        g.setColour (Colours::orange);
+//        g.drawRoundedRectangle (area, 10.0f, 2.0f);
+        Rectangle<int> area (getLocalBounds());
         g.drawImageAt(toolsIcon, area.getX(), area.getY());
     }
     
     void resized() override
     {
         // Just set the limits of our constrainer so that we don't drag ourselves off the screen
+        
     }
     
     void mouseEnter (const MouseEvent& e) override
@@ -127,9 +129,11 @@ public:
  */
 class MainContentComponent : public OpenGLAppComponent,
                             private ComboBox::Listener,
-                            private Button::Listener
+                            private Button::Listener,
+                            private Timer
 {
 public:
+    
     //==============================================================================
     MainContentComponent()
     {
@@ -138,7 +142,7 @@ public:
         textures.add (new BuiltInTexture ("Checker", BinaryData::checker_jpg, BinaryData::checker_jpgSize));
 
         addAndMakeVisible (statusLabel);
-        statusLabel.setText("Hello World", dontSendNotification);
+        statusLabel.setText("Render options:", dontSendNotification);
         statusLabel.setJustificationType (Justification::topLeft);
         statusLabel.setFont (Font (14.0f));
 
@@ -170,15 +174,48 @@ public:
         addAndMakeVisible(toolbar);
         toolbar.setBounds(getLocalBounds().getWidth()/2 - toolbar.getWidth()/2, getLocalBounds().getHeight() - toolbar.getHeight(),
                           toolbar.getWidth(), toolbar.getHeight());
-        toolbar.hide();
         lookAndFeelChanged();
+        
+        rotation = 0.0f;
+        zoom = 0.4f;
+        startTimer(2000);
     }
     
+    void resized() override
+    {
+        // This is called when the MainContentComponent is resized.
+        // If you add any child components, this is where you should
+        // update their positions.
+        Rectangle<int> area (getLocalBounds().reduced (4));
+        Rectangle<int> top (area.removeFromBottom(40));
+        statusLabel.setBounds (top);
+
+        Rectangle<int> shaderArea (area.removeFromBottom (64));
+        Rectangle<int> presets (shaderArea.removeFromTop (25));
+        presets.removeFromLeft (100);
+        presetBox.setBounds (presets.removeFromLeft (150));
+        presets.removeFromLeft (100);
+        textureBox.setBounds (presets);
+        
+        toolbar.setBounds(getLocalBounds().getWidth()/2 - toolbar.getWidth()/2, getLocalBounds().getHeight() + toolbar.getHeight(),
+                          toolbar.getWidth(), 128);
+        
+        // Must set for mouse interactions
+        draggableOrientation.setViewport (getLocalBounds());
+    }
+    
+
     ~MainContentComponent()
     {
         shutdownOpenGL();
     }
     
+    void timerCallback() override
+    {
+        stopTimer();
+        toolbar.hide();
+    }
+
     void newOpenGLContextCreated() override
     {
         // nothing to do in this case - we'll initialise our shaders + textures
@@ -242,39 +279,6 @@ public:
             if (DemoTexture* t = textures[itemID - 1])
                 setTexture(t);
         }
-    }
-
-    void initialise() override
-    {
-        rotation = 0.0f;
-        zoom = 1.0f;
-    }
-    
-    void shutdown() override
-    {
-    }
-    
-    void resized() override
-    {
-        // This is called when the MainContentComponent is resized.
-        // If you add any child components, this is where you should
-        // update their positions.
-        Rectangle<int> area (getLocalBounds().reduced (4));
-        Rectangle<int> top (area.removeFromBottom(40));
-        statusLabel.setBounds (top);
-        
-        Rectangle<int> shaderArea (area.removeFromBottom (64));
-        Rectangle<int> presets (shaderArea.removeFromTop (25));
-        presets.removeFromLeft (100);
-        presetBox.setBounds (presets.removeFromLeft (150));
-        presets.removeFromLeft (100);
-        textureBox.setBounds (presets);
-        
-//        toolbar.setBounds(getLocalBounds().getWidth()/2 - toolbar.getWidth()/2, getLocalBounds().getHeight() + toolbar.getHeight(),
-//                          toolbar.getWidth(), 128);
-        
-        // Must set for mouse interactions
-        draggableOrientation.setViewport (getLocalBounds());
     }
 
     void buttonClicked (Button*) override
@@ -363,20 +367,18 @@ public:
         g.drawLine (20, 50, 170, 50);
     }
     
+    void initialise() override
+    {
+        
+    }
+    
+    void shutdown() override
+    {
+        
+    }
+    
     void mouseMove (const MouseEvent& e) override
     {
-//        if (e.getPosition().getY() > getLocalBounds().getHeight() - toolbar.getHeight() - 50){
-//            cout << "Mouse entered toolbar hot zone" << endl;
-//            if (toolbar.isBusy()) {
-//                cout << "ops, busy" << endl;
-//            } else {
-//                cout << "not busy " << endl;
-//                if (toolbar.hidden)
-//                    toolbar.show();
-//                else
-//                    toolbar.hide();
-//            }
-//        }
     }
     
     void mouseDown (const MouseEvent& e) override

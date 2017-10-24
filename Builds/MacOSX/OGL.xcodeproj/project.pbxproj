@@ -87,9 +87,11 @@
 		F121892E666A25FDF1DD5E27 = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Accelerate.framework; path = System/Library/Frameworks/Accelerate.framework; sourceTree = SDKROOT; };
 		F22FC63D2A058B4480B0D0B1 = {isa = PBXFileReference; lastKnownFileType = file; name = "juce_gui_extra"; path = "../../../../../Downloads/JUCE/modules/juce_gui_extra"; sourceTree = "SOURCE_ROOT"; };
 		F48F80889992D763AABDBDB2 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = BinaryData.cpp; path = ../../JuceLibraryCode/BinaryData.cpp; sourceTree = "SOURCE_ROOT"; };
+		F7280DE7F1CA6194BCCF49C0 = {isa = PBXFileReference; lastKnownFileType = image.png; name = toolbar.png; path = ../../Source/Resources/toolbar.png; sourceTree = "SOURCE_ROOT"; };
 		FA1C35AE5A55C8A7597F8E95 = {isa = PBXFileReference; lastKnownFileType = file; name = "juce_events"; path = "../../../../../Downloads/JUCE/modules/juce_events"; sourceTree = "SOURCE_ROOT"; };
 		FB36CF80B7F737D93E4AA01D = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreAudio.framework; path = System/Library/Frameworks/CoreAudio.framework; sourceTree = SDKROOT; };
 		0BDA62C7A11A7EB676EF3A23 = {isa = PBXGroup; children = (
+					F7280DE7F1CA6194BCCF49C0,
 					31193EE39C20805BA2FD48FA,
 					31181F7F97BE76A445D72050,
 					163C79A526452AB5373E70C8,

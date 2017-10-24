@@ -7,6 +7,7 @@
   <MAINGROUP id="dbQHMV" name="OGL">
     <GROUP id="{D4AF001E-22F2-5D41-D655-41F2D0736B41}" name="Source">
       <GROUP id="{40FA0195-8024-68DD-C231-08D32A5D156B}" name="Resources">
+        <FILE id="rksG23" name="toolbar.png" compile="0" resource="1" file="Source/Resources/toolbar.png"/>
         <FILE id="Aw3Bm4" name="checker.jpg" compile="0" resource="1" file="Source/Resources/checker.jpg"/>
         <FILE id="qNVKgf" name="teapot.obj" compile="0" resource="1" file="Source/Resources/teapot.obj"/>
         <FILE id="Wok0if" name="tools.png" compile="0" resource="1" file="Source/Resources/tools.png"/>
