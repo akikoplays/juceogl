@@ -51,8 +51,8 @@ void Renderer::paint (Graphics& g)
        drawing code..
     */
 
-    g.setColour (Colours::red);
-    g.drawRect (getLocalBounds(), 1);   // draw an outline around the component
+//    g.setColour (Colours::darkgrey);
+//    g.drawRect (getLocalBounds(), 1);   // draw an outline around the component
 
     g.setColour (Colours::white);
     g.setFont (14.0f);
@@ -91,7 +91,7 @@ void Renderer::renderOpenGL()
 {
     jassert (OpenGLHelpers::isContextActive());
     const float desktopScale = (float) openGLContext.getRenderingScale();
-    OpenGLHelpers::clear (Colours::darkblue);
+    OpenGLHelpers::clear (Colours::black);
     
     jassert (OpenGLHelpers::isContextActive());
     
@@ -236,5 +236,22 @@ void Renderer::mouseWheelMove (const MouseEvent&, const MouseWheelDetails& d)
 void Renderer::mouseMagnify (const MouseEvent&, float magnifyAmmount)
 {
     zoom += magnifyAmmount - 1.0f;
+}
+
+bool Renderer::isInterestedInFileDrag (const StringArray&)
+{
+    return true;
+}
+
+void Renderer::filesDropped (const StringArray& filenames, int /* x */, int /* y */)
+{
+    TextureFromFile *tex = new TextureFromFile(filenames[0]);
+    if (!tex->image.isValid()){
+        cout << "Warning: failed to load texture " << filenames[0] << endl;
+        delete tex;
+        return;
+    }
+    textures.add (tex);
+    selectTexture(textures.size()-1);
 }
 

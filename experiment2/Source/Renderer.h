@@ -650,6 +650,7 @@ public:
 /*
 */
 class Renderer    : public Component,
+                    public FileDragAndDropTarget,
                     private OpenGLRenderer
 {
 public:
@@ -667,6 +668,8 @@ public:
     void mouseDrag (const MouseEvent& e) override;
     void mouseWheelMove (const MouseEvent&, const MouseWheelDetails& d) override;
     void mouseMagnify (const MouseEvent&, float magnifyAmmount) override;
+    void filesDropped (const StringArray& filenames, int /* x */, int /* y */) override;
+    bool isInterestedInFileDrag (const StringArray&) override;
 
     // User defined methods:
     void selectPreset (int preset);

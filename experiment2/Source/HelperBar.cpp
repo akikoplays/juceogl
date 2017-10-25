@@ -105,8 +105,8 @@ bool HelperBar::isInterestedInFileDrag (const StringArray&)
 
 void HelperBar::filesDropped (const StringArray& filenames, int /* x */, int /* y */)
 {
-    Array<File> files;
-    
-    for (int i = 0; i < filenames.size(); ++i)
-        files.add (File (filenames[i]));    
+//    Array<File> files;
+//
+//    for (int i = 0; i < filenames.size(); ++i)
+//        files.add (File (filenames[i]));
 }
