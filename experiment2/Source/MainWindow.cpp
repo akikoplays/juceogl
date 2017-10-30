@@ -24,13 +24,11 @@ MainWindow::MainWindow (String name)  : DocumentWindow (name,
     setUsingNativeTitleBar (true);
     setResizable(true, false);
     setResizeLimits (640, 400, 2048, 2048);
-//    centreWithSize (getWidth(), getHeight());
-
+    centreWithSize (getWidth(), getHeight());
 
     contentComponent = new MainContentComponent();
     setContentOwned (contentComponent, true);
     setVisible (true);
-
 }
 
 MainWindow::~MainWindow()

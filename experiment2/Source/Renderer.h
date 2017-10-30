@@ -13,6 +13,8 @@
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "WaveObjParser.h"
 
+class BallMenu;
+
 struct Vertex
 {
     float position[3];
@@ -121,7 +123,15 @@ struct Shape
                 vertexBuffers.add (new VertexBuffer (openGLContext, *shapeFile.shapes.getUnchecked(i)));
         
     }
-    
+
+    Shape (OpenGLContext& openGLContext, String filename)
+    {
+        if (shapeFile.load(File(filename)).wasOk()) {
+            for (int i = 0; i < shapeFile.shapes.size(); ++i)
+                vertexBuffers.add (new VertexBuffer (openGLContext, *shapeFile.shapes.getUnchecked(i)));
+        }
+    }
+
     void draw (OpenGLContext& openGLContext, Attributes& attributes)
     {
         for (int i = 0; i < vertexBuffers.size(); ++i)
@@ -270,6 +280,15 @@ struct TextureFromFile   : public Texture
 class ShaderPreset
 {
 public:
+    static int findByName(String name)
+    {
+        for (int i=0; i<ShaderPreset::getPresets().size(); i++) {
+            const ShaderPreset &p = ShaderPreset::getPresets()[i];
+            if (name == String(p.name))
+                return i;
+        }
+        return -1;
+    }
     
     static Array<ShaderPreset> getPresets()
     {
@@ -634,6 +653,33 @@ public:
                 "\n"
                 "    gl_FragColor = colour;\n"
                 "}\n"
+            },
+            {
+                "Blitter",
+                
+                SHADER_DEMO_HEADER
+                "attribute vec4 position;\n"
+                "attribute vec2 textureCoordIn;\n"
+                "varying vec2 textureCoordOut;\n"
+                "void main()\n"
+                "{\n"
+                "    textureCoordOut = textureCoordIn;\n"
+                "    gl_Position = position;\n"
+                "}\n",
+                
+                SHADER_DEMO_HEADER
+#if JUCE_OPENGL_ES
+                "precision mediump float;\n"
+                "varying lowp vec2 textureCoordOut;\n"
+#else
+                "varying vec2 textureCoordOut;\n"
+#endif
+                "uniform sampler2D demoTexture;\n"
+                "\n"
+                "void main()\n"
+                "{\n"
+                "    gl_FragColor = texture2D (demoTexture, textureCoordOut);\n"
+                "}\n"
             }
         };
         return Array<ShaderPreset> (presets, numElementsInArray (presets));
@@ -645,6 +691,21 @@ public:
     const char* fragmentShader;
 };
 
+class Shader {
+public:
+    Shader(OpenGLContext& openGLContext, String _name, String vertexShader, String fragmentShader);
+    ~Shader();
+    const bool isOk();
+public:
+    ScopedPointer<OpenGLShaderProgram> shader;
+    ScopedPointer<Attributes> attributes;
+    ScopedPointer<Uniforms> uniforms;
+    String name;
+    
+private:
+    bool ok;
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Shader)
+};
 
 //==============================================================================
 /*
@@ -672,29 +733,28 @@ public:
     bool isInterestedInFileDrag (const StringArray&) override;
 
     // User defined methods:
-    void selectPreset (int preset);
     void selectTexture (int itemID);
     Matrix3D<float> getProjectionMatrix() const;
     Matrix3D<float> getViewMatrix() const;
-    void setShaderProgram (const String& _vertexShader, const String& _fragmentShader);
-    void updateShader();
+    const Shader* getShaderByName(const String name);
     void setTexture (Texture* t);
 
 private:
-    String vertexShader, fragmentShader;
-    ScopedPointer<OpenGLShaderProgram> shader;
+    File planeObj;
+    ScopedPointer<Shape> planeShape;
     ScopedPointer<Shape> shape;
-    ScopedPointer<Attributes> attributes;
-    ScopedPointer<Uniforms> uniforms;
     Draggable3DOrientation draggableOrientation;
+    ScopedPointer<BallMenu> ballMenu;
     float zoom;
     float rotation;
     ComboBox presetBox, textureBox;
     Label presetLabel, textureLabel, statusLabel;
     OwnedArray<Texture> textures;
+    OwnedArray<Shader> shaders;
     Texture *textureToUse;
     OpenGLTexture texture;
     ComponentAnimator toolbarAnimator;
     OpenGLContext openGLContext;
+    OpenGLFrameBuffer fbo;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Renderer)
 };

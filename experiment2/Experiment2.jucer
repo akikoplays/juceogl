@@ -6,8 +6,11 @@
               cppLanguageStandard="14" jucerVersion="5.1.2">
   <MAINGROUP id="nCYvlG" name="Gui xperiments 2">
     <GROUP id="{824BB195-8392-1390-0D2D-3F9C3F5038D0}" name="Source">
+      <FILE id="ZnrUlC" name="BallMenu.cpp" compile="1" resource="0" file="Source/BallMenu.cpp"/>
+      <FILE id="iwCch2" name="BallMenu.h" compile="0" resource="0" file="Source/BallMenu.h"/>
       <GROUP id="{A1D01AC6-986D-93E3-04A7-D441D0F3C490}" name="Resources">
         <FILE id="akIwdE" name="checker.jpg" compile="0" resource="1" file="Source/Resources/checker.jpg"/>
+        <FILE id="Ou9YVJ" name="juce_icon.png" compile="0" resource="1" file="Source/Resources/juce_icon.png"/>
         <FILE id="IAuA4O" name="teapot.obj" compile="0" resource="1" file="Source/Resources/teapot.obj"/>
       </GROUP>
       <FILE id="Pp0oga" name="WaveObjParser.h" compile="0" resource="0" file="Source/WaveObjParser.h"/>

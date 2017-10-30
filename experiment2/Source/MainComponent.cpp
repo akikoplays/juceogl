@@ -11,7 +11,7 @@
 //==============================================================================
 MainContentComponent::MainContentComponent()
 {
-    setSize (640, 400);
+    setSize (640, 480);
 
     addAndMakeVisible(helper);
     addAndMakeVisible(renderer);
