@@ -656,7 +656,7 @@ public:
             },
             {
                 "Blitter",
-                
+                // following this thread: https://stackoverflow.com/questions/2588875/whats-the-best-way-to-draw-a-fullscreen-quad-in-opengl-3-2
                 SHADER_DEMO_HEADER
                 "attribute vec4 position;\n"
                 "attribute vec2 textureCoordIn;\n"
@@ -664,7 +664,7 @@ public:
                 "void main()\n"
                 "{\n"
                 "    textureCoordOut = textureCoordIn;\n"
-                "    gl_Position = position;\n"
+                "    gl_Position = vec4(position.x*5.0, position.z*5.0, 0.0, 1.0);\n"
                 "}\n",
                 
                 SHADER_DEMO_HEADER

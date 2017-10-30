@@ -15,7 +15,7 @@
 
 using namespace std;
 
-//#define USE_RTT
+#define USE_RTT
 
 //==============================================================================
 Renderer::Renderer()
@@ -112,9 +112,6 @@ void Renderer::openGLContextClosing()
     // any GPU resources while the context is still current.
     shape = nullptr;
     planeShape = nullptr;
-//    shader = nullptr;
-//    attributes = nullptr;
-//    uniforms = nullptr;
     texture.release();
 #ifdef USE_RTT
     fbo.release();
@@ -138,6 +135,10 @@ void Renderer::renderOpenGL()
     if(shader == nullptr)
         return;
     
+#ifdef USE_RTT
+    fbo.makeCurrentRenderingTarget();
+#endif
+
     // Having used the juce 2D renderer, it will have messed-up a whole load of GL state, so
     // we need to initialise some important settings before doing our normal GL 3D drawing..
     glEnable (GL_DEPTH_TEST);
@@ -175,87 +176,25 @@ void Renderer::renderOpenGL()
     openGLContext.extensions.glBindBuffer (GL_ARRAY_BUFFER, 0);
     openGLContext.extensions.glBindBuffer (GL_ELEMENT_ARRAY_BUFFER, 0);
     
-}
-
-/*
-// This is a virtual method in OpenGLRenderer, and is called when it's time
-// to do your GL rendering.
-void Renderer::renderOpenGL()
-{
-    jassert (OpenGLHelpers::isContextActive());
-    const float desktopScale = (float) openGLContext.getRenderingScale();
-    OpenGLHelpers::clear (Colours::darkblue);
-    
-    jassert (OpenGLHelpers::isContextActive());
-    
-    if (textureToUse != nullptr)
-        if (! textureToUse->applyTo (texture))
-            textureToUse = nullptr;
-    
-    updateShader();   // Check whether we need to compile a new shader
-    
-    if (shader == nullptr)
-        return;
-    
-    
-#ifdef USE_RTT
-    fbo.makeCurrentRenderingTarget();
-#endif
-    
-    // Having used the juce 2D renderer, it will have messed-up a whole load of GL state, so
-    // we need to initialise some important settings before doing our normal GL 3D drawing..
-    glEnable (GL_DEPTH_TEST);
-    glDepthFunc (GL_LESS);
-    glEnable (GL_BLEND);
-    glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    openGLContext.extensions.glActiveTexture (GL_TEXTURE0);
-    glEnable (GL_TEXTURE_2D);
-    
-    glViewport (0, 0, roundToInt (desktopScale * getWidth()), roundToInt (desktopScale * getHeight()));
-    
-    texture.bind();
-    
-    glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    
-    shader->use();
-    
-    if (uniforms->projectionMatrix != nullptr)
-        uniforms->projectionMatrix->setMatrix4 (getProjectionMatrix().mat, 1, false);
-    
-    if (uniforms->viewMatrix != nullptr)
-        uniforms->viewMatrix->setMatrix4 (getViewMatrix().mat, 1, false);
-    
-    if (uniforms->texture != nullptr)
-        uniforms->texture->set ((GLint) 0);
-    
-    if (uniforms->lightPosition != nullptr)
-        uniforms->lightPosition->set (-15.0f, 10.0f, 15.0f, 0.0f);
-    
-    shape->draw (openGLContext, *attributes);
-    planeShape->draw (openGLContext, *attributes);
-
-    // Reset the element buffers so child Components draw correctly
-    openGLContext.extensions.glBindBuffer (GL_ARRAY_BUFFER, 0);
-    openGLContext.extensions.glBindBuffer (GL_ELEMENT_ARRAY_BUFFER, 0);
-
-    // experiment
-//    Rectangle<int>r(0, 0, 512, 512);
-//    PixelARGB *bitmap = new PixelARGB[512*512];
-//    fbo.readPixels(bitmap, r);
-//    delete [] bitmap;
-    
 #ifdef USE_RTT
     fbo.releaseAsRenderingTarget();
 #endif
-}
-*/
+    openGLContext.extensions.glActiveTexture (GL_TEXTURE0);
+    glBindTexture (GL_TEXTURE_2D, fbo.getTextureID());
 
-//void Renderer::selectPreset (int preset)
-//{
-//    const ShaderPreset& p = ShaderPreset::getPresets()[preset];
-//    setShaderProgram(p.vertexShader, p.fragmentShader);
-//}
+    // Post fx blitter
+    shader = getShaderByName("Blitter");
+    if(shader == nullptr)
+        return;
+    
+    shader->shader->use();
+
+    if (shader->uniforms->texture != nullptr)
+        shader->uniforms->texture->set ((GLint) 0);
+    attr = shader->attributes;
+    planeShape->draw(openGLContext, *attr);
+
+}
 
 void Renderer::selectTexture (int itemID)
 {
@@ -277,52 +216,6 @@ Matrix3D<float> Renderer::getViewMatrix() const
     return rotationMatrix * viewMatrix;
 }
 
-//void Renderer::setShaderProgram (const String& _vertexShader, const String& _fragmentShader)
-//{
-//    vertexShader = _vertexShader;
-//    fragmentShader = _fragmentShader;
-//}
-
-//void Renderer::setShaderProgram (const ShaderPreset preset)
-//{
-//    setShaderProgram(preset.vertexShader, preset.fragmentShader);
-//}
-
-/*
-void Renderer::updateShader()
-{
-    if (vertexShader.isNotEmpty() || fragmentShader.isNotEmpty())
-    {
-        ScopedPointer<OpenGLShaderProgram> newShader (new OpenGLShaderProgram (openGLContext));
-        String statusText;
-        
-        if (newShader->addVertexShader (OpenGLHelpers::translateVertexShaderToV3 (vertexShader))
-            && newShader->addFragmentShader (OpenGLHelpers::translateFragmentShaderToV3 (fragmentShader))
-            && newShader->link())
-        {
-            shape = nullptr;
-            attributes = nullptr;
-            uniforms = nullptr;
-            
-            shader = newShader;
-            shader->use();
-            
-            shape      = new Shape (openGLContext);
-            attributes = new Attributes (openGLContext, *shader);
-            uniforms   = new Uniforms (openGLContext, *shader);
-            
-            statusText = "GLSL: v" + String (OpenGLShaderProgram::getLanguageVersion(), 2);
-        }
-        else
-        {
-            statusText = newShader->getLastError();
-        }
-        
-        vertexShader = String();
-        fragmentShader = String();
-    }
-}
-*/
 void Renderer::setTexture (Texture* t)
 {
     textureToUse = t;
