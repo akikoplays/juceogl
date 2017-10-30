@@ -693,9 +693,12 @@ public:
 
 class Shader {
 public:
+    Shader(OpenGLContext& openGLContext, String _name, String baseFilename);
     Shader(OpenGLContext& openGLContext, String _name, String vertexShader, String fragmentShader);
     ~Shader();
     const bool isOk();
+private:
+    void build(OpenGLContext& openGLContext, String _name, String vertexShader, String fragmentShader);
 public:
     ScopedPointer<OpenGLShaderProgram> shader;
     ScopedPointer<Attributes> attributes;
@@ -743,6 +746,7 @@ private:
     File planeObj;
     ScopedPointer<Shape> planeShape;
     ScopedPointer<Shape> shape;
+    ScopedPointer<Shader> fsBlitterShader;
     Draggable3DOrientation draggableOrientation;
     ScopedPointer<BallMenu> ballMenu;
     float zoom;

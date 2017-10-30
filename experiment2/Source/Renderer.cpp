@@ -81,6 +81,7 @@ void Renderer::newOpenGLContextCreated()
     
 #ifdef USE_RTT
     // test off screen render
+    // todo: reinitialise FBO with current window size during resize()
     fbo.initialise(openGLContext, 512, 512);
 #endif
     
@@ -94,16 +95,10 @@ void Renderer::newOpenGLContextCreated()
         shaders.add(new Shader(openGLContext, p.name, p.vertexShader, p.fragmentShader));
         cout << " OK! " << endl;
     }
-}
-
-const Shader* Renderer::getShaderByName(const String name)
-{
-    for (int i=0; i<shaders.size(); i++) {
-        Shader *s = shaders[i];
-        if (s->name == name)
-            return s;
-    }
-    return nullptr;
+    
+    // Manually load some shaders
+    fsBlitterShader = new Shader(openGLContext, "fsblitter", "../../../../Source/Resources/fsblit");
+    cout << "Done" << endl;
 }
 
 void Renderer::openGLContextClosing()
@@ -117,7 +112,6 @@ void Renderer::openGLContextClosing()
     fbo.release();
 #endif
 }
-
 
 // This is a virtual method in OpenGLRenderer, and is called when it's time
 // to do your GL rendering.
@@ -136,7 +130,7 @@ void Renderer::renderOpenGL()
         return;
     
 #ifdef USE_RTT
-    fbo.makeCurrentRenderingTarget();
+    fbo.makeCurrentAndClear();
 #endif
 
     // Having used the juce 2D renderer, it will have messed-up a whole load of GL state, so
@@ -148,7 +142,8 @@ void Renderer::renderOpenGL()
     openGLContext.extensions.glActiveTexture (GL_TEXTURE0);
     glEnable (GL_TEXTURE_2D);
     
-    glViewport (0, 0, roundToInt (desktopScale * getWidth()), roundToInt (desktopScale * getHeight()));
+    //glViewport (0, 0, roundToInt (desktopScale * getWidth()), roundToInt (desktopScale * getHeight()));
+    glViewport (0, 0, roundToInt(fbo.getWidth()), roundToInt(fbo.getHeight()));
     
     texture.bind();
     
@@ -178,12 +173,16 @@ void Renderer::renderOpenGL()
     
 #ifdef USE_RTT
     fbo.releaseAsRenderingTarget();
-#endif
+    
+    glEnable (GL_DEPTH_TEST);
+    glDepthFunc (GL_LESS);
+
     openGLContext.extensions.glActiveTexture (GL_TEXTURE0);
     glBindTexture (GL_TEXTURE_2D, fbo.getTextureID());
+    glViewport (0, 0, roundToInt (desktopScale * getWidth()), roundToInt (desktopScale * getHeight()));
 
     // Post fx blitter
-    shader = getShaderByName("Blitter");
+    shader = fsBlitterShader;
     if(shader == nullptr)
         return;
     
@@ -193,6 +192,7 @@ void Renderer::renderOpenGL()
         shader->uniforms->texture->set ((GLint) 0);
     attr = shader->attributes;
     planeShape->draw(openGLContext, *attr);
+#endif
 
 }
 
@@ -279,26 +279,38 @@ void Renderer::filesDropped (const StringArray& filenames, int /* x */, int /* y
     }
 }
 
+const Shader* Renderer::getShaderByName(const String name)
+{
+    for (int i=0; i<shaders.size(); i++) {
+        Shader *s = shaders[i];
+        if (s->name == name)
+            return s;
+    }
+    return nullptr;
+}
+
+Shader::Shader(OpenGLContext& openGLContext, String _name, String baseFilename)
+{
+    cout << "Loading vertex shader " << _name << " from file: " << baseFilename << endl;
+    File vertFile(baseFilename + ".vert");
+    if (!vertFile.existsAsFile()) {
+        cout << "Error!" << endl;
+        return;
+    }
+    
+    cout << "Loading fragment shader " << _name << " from file: " << baseFilename << endl;
+    File fragFile(baseFilename + ".frag");
+    if (!fragFile.existsAsFile()) {
+        cout << "Error!" << endl;
+        return;
+    }
+
+    build(openGLContext, _name, vertFile.loadFileAsString(), fragFile.loadFileAsString());
+}
+
 Shader::Shader(OpenGLContext& openGLContext, String _name, String vertexShader, String fragmentShader)
 {
-    name = _name;
-    //ScopedPointer<OpenGLShaderProgram> newShader (new OpenGLShaderProgram (openGLContext));
-    shader = new OpenGLShaderProgram(openGLContext);
-    if (shader->addVertexShader (OpenGLHelpers::translateVertexShaderToV3 (vertexShader))
-        && shader->addFragmentShader (OpenGLHelpers::translateFragmentShaderToV3 (fragmentShader))
-        && shader->link())
-    {        
-        attributes = new Attributes (openGLContext, *shader);
-        uniforms   = new Uniforms (openGLContext, *shader);
-        
-        cout << "Shader Assembler, GLSL: v" + String (OpenGLShaderProgram::getLanguageVersion(), 2) << endl;
-        ok = true;
-    }
-    else
-    {
-        ok = false;
-        cout << "Shader Assembler, " << shader->getLastError() << endl;
-    }
+    build(openGLContext, _name, vertexShader, fragmentShader);
 }
 
 Shader::~Shader()
@@ -306,6 +318,29 @@ Shader::~Shader()
     attributes = nullptr;
     uniforms = nullptr;
     shader = nullptr;
+}
+
+void Shader::build(OpenGLContext& openGLContext, String _name, String vertexShader, String fragmentShader)
+{
+    
+    cout << "Shader Assembler, assembling shader: " << _name << endl;
+    name = _name;
+    shader = new OpenGLShaderProgram(openGLContext);
+    if (shader->addVertexShader (OpenGLHelpers::translateVertexShaderToV3 (vertexShader))
+        && shader->addFragmentShader (OpenGLHelpers::translateFragmentShaderToV3 (fragmentShader))
+        && shader->link())
+    {
+        attributes = new Attributes (openGLContext, *shader);
+        uniforms   = new Uniforms (openGLContext, *shader);
+        
+        cout << endl << "GLSL: v" + String (OpenGLShaderProgram::getLanguageVersion(), 2) << endl;
+        ok = true;
+    }
+    else
+    {
+        ok = false;
+        cout << endl << "Error: " << shader->getLastError() << endl;
+    }
 }
 
 const bool Shader::isOk()
