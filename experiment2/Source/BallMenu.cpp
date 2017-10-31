@@ -10,6 +10,9 @@
 
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "BallMenu.h"
+#include "Renderer.h"
+
+using namespace std;
 
 //==============================================================================
 BallMenu::BallMenu()
@@ -29,15 +32,17 @@ void BallMenu::launch()
         b->addListener (this);
     }
     
+    
+    Rectangle<int> bounds = getLocalBounds();
     for (int i = 0; i < animations.size(); ++i)
-        animations.getUnchecked(i)->setBounds (getLocalBounds().reduced (50, 50));
+        animations.getUnchecked(i)->setBounds(bounds.reduced (150, 150));
     
     for (int i = 0; i < animations.size(); ++i)
     {
-        const int w = getWidth();
-        const int h = getHeight();
+        const int w = bounds.getWidth();
+        const int h = bounds.getHeight();
         const int newIndex = (i + 3) % animations.size();
-        const float angle = newIndex * 2.0f * float_Pi / animations.size();
+        const float angle = newIndex * 1.7f * float_Pi / animations.size();
         const float radius = w * 0.15f;
         
         Rectangle<int> r (w  / 2 + (int) (radius * std::sin (angle) - 50),
@@ -47,16 +52,21 @@ void BallMenu::launch()
         animator.animateComponent (animations.getUnchecked(i),
                                    r.reduced (10),
                                    1.0f,
-                                   500 + i * 100,
+                                   300 + i * 50,
                                    false,
                                    0.0,
                                    0.0);
     }
+}
 
+void BallMenu::hide()
+{
+    
 }
 
 BallMenu::~BallMenu()
 {
+    cout << "BallMenu:: deleting" << endl;
 }
 
 void BallMenu::paint (Graphics& g)
@@ -89,6 +99,15 @@ void BallMenu::resized()
 void BallMenu::buttonClicked (Button*)
 {
     // todo
+}
+
+void BallMenu::mouseDown (const MouseEvent& e)
+{
+    cout << "BallMenu:: mouse clicked" << endl;
+    Renderer *parent = dynamic_cast<Renderer*>(getParentComponent());
+    jassert(parent);
+    if (parent)
+        parent->hideBallMenu();
 }
 
 Button* BallMenu::createButton()

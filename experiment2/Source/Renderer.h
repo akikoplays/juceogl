@@ -729,6 +729,7 @@ public:
     void renderOpenGL() override;
     void mouseMove (const MouseEvent& e) override;
     void mouseDown (const MouseEvent& e) override;
+    void mouseUp (const MouseEvent& e) override;
     void mouseDrag (const MouseEvent& e) override;
     void mouseWheelMove (const MouseEvent&, const MouseWheelDetails& d) override;
     void mouseMagnify (const MouseEvent&, float magnifyAmmount) override;
@@ -740,8 +741,10 @@ public:
     Matrix3D<float> getProjectionMatrix() const;
     Matrix3D<float> getViewMatrix() const;
     const Shader* getShaderByName(const String name);
+    Texture* getTextureByName(const String name);
     void setTexture (Texture* t);
-
+    void hideBallMenu();
+    
 private:
     File planeObj;
     ScopedPointer<Shape> planeShape;
@@ -757,8 +760,12 @@ private:
     OwnedArray<Shader> shaders;
     Texture *textureToUse;
     OpenGLTexture texture;
+    OpenGLTexture backgroundTexture;
     ComponentAnimator toolbarAnimator;
     OpenGLContext openGLContext;
     OpenGLFrameBuffer fbo;
+    int64 clickStart;
+    bool wasDrag;
+    
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Renderer)
 };

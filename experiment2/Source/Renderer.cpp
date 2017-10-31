@@ -16,6 +16,8 @@
 using namespace std;
 
 #define USE_RTT
+#define RTT_WIDTH 1024
+#define RTT_HEIGHT 1024
 
 //==============================================================================
 Renderer::Renderer()
@@ -30,13 +32,15 @@ Renderer::Renderer()
     openGLContext.attachTo (*this);
     openGLContext.setContinuousRepainting (true);
     
-
     // Load default texture, configure camera and renderer
-    textures.add (new BuiltInTexture ("Checker", BinaryData::checker_jpg, BinaryData::checker_jpgSize));
+    textures.add(new BuiltInTexture("Checker", BinaryData::checker_jpg, BinaryData::checker_jpgSize));
     rotation = 0.0f;
     zoom = 0.4f;
-    
-//    selectPreset(0);
+
+    // Load gradient texture
+    textures.add(new BuiltInTexture("Background", BinaryData::lightbluebackground_jpg, BinaryData::lightbluebackground_jpgSize));
+
+    // Use this texture for object mapping
     selectTexture(0);
 }
 
@@ -56,7 +60,7 @@ void Renderer::paint (Graphics& g)
 
 //    g.setColour (Colours::darkgrey);
 //    g.drawRect (getLocalBounds(), 1);   // draw an outline around the component
-
+    
     g.setColour (Colours::white);
     g.setFont (14.0f);
     g.drawText ("Renderer", getLocalBounds(),
@@ -70,7 +74,14 @@ void Renderer::resized()
     // Must set for mouse interactions
     draggableOrientation.setViewport (getLocalBounds());
     if (ballMenu != nullptr) {
-        ballMenu->setBounds(getLocalBounds().reduced(10,10));
+        Rectangle<int> bounds = getLocalBounds();
+        int w = 600;
+        int h = 400;
+        bounds.setWidth(w);
+        bounds.setHeight(h);
+        bounds.setX(getLocalBounds().getWidth()/2 - w/2);
+        bounds.setY(getLocalBounds().getHeight()/2 - h/2);
+        ballMenu->setBounds(bounds);
     }
 }
 
@@ -82,7 +93,7 @@ void Renderer::newOpenGLContextCreated()
 #ifdef USE_RTT
     // test off screen render
     // todo: reinitialise FBO with current window size during resize()
-    fbo.initialise(openGLContext, 512, 512);
+    fbo.initialise(openGLContext, RTT_WIDTH, RTT_HEIGHT);
 #endif
     
     // Load plane obj used to for RTT processing
@@ -99,6 +110,11 @@ void Renderer::newOpenGLContextCreated()
     // Manually load some shaders
     fsBlitterShader = new Shader(openGLContext, "fsblitter", "../../../../Source/Resources/fsblit");
     cout << "Done" << endl;
+
+    // Load backgdround gradient image and create OGL texture
+    Texture *t = getTextureByName("Background");
+    jassert(t);
+    t->applyTo(backgroundTexture);
 }
 
 void Renderer::openGLContextClosing()
@@ -108,6 +124,7 @@ void Renderer::openGLContextClosing()
     shape = nullptr;
     planeShape = nullptr;
     texture.release();
+    backgroundTexture.release();
 #ifdef USE_RTT
     fbo.release();
 #endif
@@ -121,13 +138,12 @@ void Renderer::renderOpenGL()
     const float desktopScale = (float) openGLContext.getRenderingScale();
     OpenGLHelpers::clear (Colours::darkblue);
     
-    if (textureToUse != nullptr)
-        if (! textureToUse->applyTo (texture))
-            textureToUse = nullptr;
+#ifdef USE_RTT
+    glViewport (0, 0, roundToInt(fbo.getWidth()), roundToInt(fbo.getHeight()));
+#else
+    glViewport (0, 0, roundToInt (desktopScale * getWidth()), roundToInt (desktopScale * getHeight()));
+#endif
 
-    const Shader *shader = getShaderByName("Texture + Lighting");
-    if(shader == nullptr)
-        return;
     
 #ifdef USE_RTT
     fbo.makeCurrentAndClear();
@@ -141,9 +157,37 @@ void Renderer::renderOpenGL()
     glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     openGLContext.extensions.glActiveTexture (GL_TEXTURE0);
     glEnable (GL_TEXTURE_2D);
+
+    // Render background gradient
+    backgroundTexture.bind();
     
-    //glViewport (0, 0, roundToInt (desktopScale * getWidth()), roundToInt (desktopScale * getHeight()));
-    glViewport (0, 0, roundToInt(fbo.getWidth()), roundToInt(fbo.getHeight()));
+    // -------------------------------------------------------
+    // FS blitter
+    // -------------------------------------------------------
+    const Shader *shader;
+    Attributes *attr;
+    
+    shader = fsBlitterShader;
+    jassert(shader);
+    
+    shader->shader->use();
+    
+    if (shader->uniforms->texture != nullptr)
+        shader->uniforms->texture->set ((GLint) 0);
+    attr = shader->attributes;
+    planeShape->draw(openGLContext, *attr);
+
+    
+    // -------------------------------------------------------
+    // Render object:
+    // -------------------------------------------------------
+    if (textureToUse != nullptr)
+        if (! textureToUse->applyTo (texture))
+            textureToUse = nullptr;
+    
+    shader = getShaderByName("Texture + Lighting");
+    if(shader == nullptr)
+        return;
     
     texture.bind();
     
@@ -164,7 +208,7 @@ void Renderer::renderOpenGL()
     if (shader->uniforms->lightPosition != nullptr)
         shader->uniforms->lightPosition->set (-15.0f, 10.0f, 15.0f, 0.0f);
     
-    Attributes *attr = shader->attributes;
+    attr = shader->attributes;
     shape->draw(openGLContext, *attr);
     
     // Reset the element buffers so child Components draw correctly
@@ -172,16 +216,16 @@ void Renderer::renderOpenGL()
     openGLContext.extensions.glBindBuffer (GL_ELEMENT_ARRAY_BUFFER, 0);
     
 #ifdef USE_RTT
+    // -------------------------------------------------------
+    // Post fx RTT blitter
+    // -------------------------------------------------------
+
     fbo.releaseAsRenderingTarget();
     
-    glEnable (GL_DEPTH_TEST);
-    glDepthFunc (GL_LESS);
-
     openGLContext.extensions.glActiveTexture (GL_TEXTURE0);
     glBindTexture (GL_TEXTURE_2D, fbo.getTextureID());
     glViewport (0, 0, roundToInt (desktopScale * getWidth()), roundToInt (desktopScale * getHeight()));
 
-    // Post fx blitter
     shader = fsBlitterShader;
     if(shader == nullptr)
         return;
@@ -228,18 +272,39 @@ void Renderer::mouseMove (const MouseEvent& e)
 void Renderer::mouseDown (const MouseEvent& e)
 {
     draggableOrientation.mouseDown (e.getPosition());
+    clickStart = Time::currentTimeMillis();
+    wasDrag = false;
+}
+
+void Renderer::mouseUp (const MouseEvent& e)
+{
     cout << "Mouse down event" << endl;
-    if (ballMenu == nullptr){
-        ballMenu = new BallMenu();
-        addAndMakeVisible(ballMenu);
-        ballMenu->setBounds(getLocalBounds().reduced(10,10));
-        ballMenu->launch();
+    if (Time::currentTimeMillis() - clickStart > 50 && !wasDrag) {
+        cout << "-- >50ms" << endl;
+        if (ballMenu == nullptr){
+            ballMenu = new BallMenu();
+            addAndMakeVisible(ballMenu);
+            Rectangle<int> bounds = getLocalBounds();
+            int w = 600;
+            int h = 400;
+            bounds.setWidth(w);
+            bounds.setHeight(h);
+            bounds.setX(getLocalBounds().getWidth()/2 - w/2);
+            bounds.setY(getLocalBounds().getHeight()/2 - h/2);
+            ballMenu->setBounds(bounds);
+            ballMenu->launch();
+        }
+    } else {
+        cout << "-- <50ms" << endl;
+        draggableOrientation.mouseDown (e.getPosition());
     }
 }
 
 void Renderer::mouseDrag (const MouseEvent& e)
 {
     draggableOrientation.mouseDrag (e.getPosition());
+    if (Time::currentTimeMillis() - clickStart > 100)
+        wasDrag = true;
 }
 
 void Renderer::mouseWheelMove (const MouseEvent&, const MouseWheelDetails& d)
@@ -287,6 +352,23 @@ const Shader* Renderer::getShaderByName(const String name)
             return s;
     }
     return nullptr;
+}
+
+Texture* Renderer::getTextureByName(const String name)
+{
+    for (int i=0; i<textures.size(); i++) {
+        Texture *t = textures[i];
+        if (t->name == name)
+            return t;
+    }
+    return nullptr;
+}
+
+void Renderer::hideBallMenu()
+{
+    if (ballMenu) {
+        ballMenu = nullptr;
+    }
 }
 
 Shader::Shader(OpenGLContext& openGLContext, String _name, String baseFilename)

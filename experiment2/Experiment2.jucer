@@ -11,6 +11,8 @@
       <GROUP id="{A1D01AC6-986D-93E3-04A7-D441D0F3C490}" name="Resources">
         <FILE id="akIwdE" name="checker.jpg" compile="0" resource="1" file="Source/Resources/checker.jpg"/>
         <FILE id="Ou9YVJ" name="juce_icon.png" compile="0" resource="1" file="Source/Resources/juce_icon.png"/>
+        <FILE id="VPG3N7" name="light-blue-background.jpg" compile="0" resource="1"
+              file="Source/Resources/light-blue-background.jpg"/>
         <FILE id="IAuA4O" name="teapot.obj" compile="0" resource="1" file="Source/Resources/teapot.obj"/>
       </GROUP>
       <FILE id="Pp0oga" name="WaveObjParser.h" compile="0" resource="0" file="Source/WaveObjParser.h"/>
