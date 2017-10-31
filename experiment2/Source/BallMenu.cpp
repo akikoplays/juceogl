@@ -99,6 +99,10 @@ void BallMenu::resized()
 void BallMenu::buttonClicked (Button*)
 {
     // todo
+    Renderer *parent = dynamic_cast<Renderer*>(getParentComponent());
+    jassert(parent);
+    if (parent)
+        parent->hideBallMenu();
 }
 
 void BallMenu::mouseDown (const MouseEvent& e)

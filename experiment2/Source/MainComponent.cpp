@@ -13,7 +13,7 @@ MainContentComponent::MainContentComponent()
 {
     setSize (640, 480);
 
-    addAndMakeVisible(helper);
+//    addAndMakeVisible(helper);
     addAndMakeVisible(renderer);
 }
 
@@ -23,12 +23,6 @@ MainContentComponent::~MainContentComponent()
 
 void MainContentComponent::paint (Graphics& g)
 {
-    // (Our component is opaque, so we must completely fill the background with a solid colour)
-    g.fillAll (getLookAndFeel().findColour (ResizableWindow::backgroundColourId));
-
-    g.setFont (Font (16.0f));
-    g.setColour (Colours::white);
-    g.drawText ("Hello World!", getLocalBounds(), Justification::centred, true);
 }
 
 void MainContentComponent::resized()
@@ -38,8 +32,8 @@ void MainContentComponent::resized()
     // update their positions.
     
     auto r = getLocalBounds();
-    auto h = r.removeFromBottom(64);
-    helper.setBounds(h);
+//    auto h = r.removeFromBottom(64);
+//    helper.setBounds(h);
     renderer.setBounds(r);
 }
 

@@ -42,6 +42,8 @@ Renderer::Renderer()
 
     // Use this texture for object mapping
     selectTexture(0);
+    
+    mainCaption = "3D Viewer";
 }
 
 Renderer::~Renderer()
@@ -61,10 +63,16 @@ void Renderer::paint (Graphics& g)
 //    g.setColour (Colours::darkgrey);
 //    g.drawRect (getLocalBounds(), 1);   // draw an outline around the component
     
-    g.setColour (Colours::white);
-    g.setFont (14.0f);
-    g.drawText ("Renderer", getLocalBounds(),
-                Justification::centred, true);   // draw some placeholder text
+//    g.setColour (Colours::white);
+//    g.setFont (14.0f);
+//    g.drawText ("Renderer", getLocalBounds(),
+//                Justification::centred, true);   // draw some placeholder text
+    
+    g.setColour (getLookAndFeel().findColour (Label::textColourId));
+    g.setFont (20);
+    g.drawText (mainCaption, 25, 20, 300, 30, Justification::left);
+    g.drawLine (20, 20, 170, 20);
+    g.drawLine (20, 50, 170, 50);
 }
 
 void Renderer::resized()
@@ -100,16 +108,13 @@ void Renderer::newOpenGLContextCreated()
     shape = new Shape(openGLContext, "../../../../Source/Resources/teapot.obj");
     planeShape = new Shape(openGLContext, "../../../../Source/Resources/plane.obj");
 
-    for (int i=0; i<ShaderPreset::getPresets().size(); i++) {
-        const ShaderPreset p = ShaderPreset::getPresets()[i];
-        cout << "Linking shader: " << p.name;
-        shaders.add(new Shader(openGLContext, p.name, p.vertexShader, p.fragmentShader));
-        cout << " OK! " << endl;
-    }
-    
     // Manually load some shaders
-    fsBlitterShader = new Shader(openGLContext, "fsblitter", "../../../../Source/Resources/fsblit");
-    cout << "Done" << endl;
+    Shader *shader = new Shader(openGLContext, "fsblitter", "../../../../Source/Resources/fsblit", "#define LUMA 0\n#define JUCE_OPENGL_ES 0\n");
+    shaders.add(shader);
+    shader = new Shader(openGLContext, "fsblitterluma", "../../../../Source/Resources/fsblit", "#define LUMA 1\n#define JUCE_OPENGL_ES 0\n");
+    shaders.add(shader);
+    shader = new Shader(openGLContext, "tex_light", "../../../../Source/Resources/tex_light", "#define JUCE_OPENGL_ES 0\n");
+    shaders.add(shader);
 
     // Load backgdround gradient image and create OGL texture
     Texture *t = getTextureByName("Background");
@@ -134,6 +139,9 @@ void Renderer::openGLContextClosing()
 // to do your GL rendering.
 void Renderer::renderOpenGL()
 {
+    // todo: this is a bit bruteforced
+    repaint();
+    
     jassert (OpenGLHelpers::isContextActive());
     const float desktopScale = (float) openGLContext.getRenderingScale();
     OpenGLHelpers::clear (Colours::darkblue);
@@ -167,9 +175,8 @@ void Renderer::renderOpenGL()
     const Shader *shader;
     Attributes *attr;
     
-    shader = fsBlitterShader;
+    shader = getShaderByName("fsblitter");
     jassert(shader);
-    
     shader->shader->use();
     
     if (shader->uniforms->texture != nullptr)
@@ -185,15 +192,13 @@ void Renderer::renderOpenGL()
         if (! textureToUse->applyTo (texture))
             textureToUse = nullptr;
     
-    shader = getShaderByName("Texture + Lighting");
-    if(shader == nullptr)
-        return;
-    
     texture.bind();
     
     glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
     
+    shader = getShaderByName("tex_light");
+    jassert(shader);
     shader->shader->use();
     
     if (shader->uniforms->projectionMatrix != nullptr)
@@ -226,10 +231,11 @@ void Renderer::renderOpenGL()
     glBindTexture (GL_TEXTURE_2D, fbo.getTextureID());
     glViewport (0, 0, roundToInt (desktopScale * getWidth()), roundToInt (desktopScale * getHeight()));
 
-    shader = fsBlitterShader;
-    if(shader == nullptr)
-        return;
-    
+    if (ballMenu)
+        shader = getShaderByName("fsblitterluma");
+    else
+        shader = getShaderByName("fsblitter");
+    jassert(shader);
     shader->shader->use();
 
     if (shader->uniforms->texture != nullptr)
@@ -293,6 +299,7 @@ void Renderer::mouseUp (const MouseEvent& e)
             bounds.setY(getLocalBounds().getHeight()/2 - h/2);
             ballMenu->setBounds(bounds);
             ballMenu->launch();
+            mainCaption = "Apply effect";
         }
     } else {
         cout << "-- <50ms" << endl;
@@ -368,10 +375,11 @@ void Renderer::hideBallMenu()
 {
     if (ballMenu) {
         ballMenu = nullptr;
+        mainCaption = "3D Viewer";
     }
 }
 
-Shader::Shader(OpenGLContext& openGLContext, String _name, String baseFilename)
+Shader::Shader(OpenGLContext& openGLContext, String _name, String baseFilename, String preprocdefines)
 {
     cout << "Loading vertex shader " << _name << " from file: " << baseFilename << endl;
     File vertFile(baseFilename + ".vert");
@@ -387,12 +395,12 @@ Shader::Shader(OpenGLContext& openGLContext, String _name, String baseFilename)
         return;
     }
 
-    build(openGLContext, _name, vertFile.loadFileAsString(), fragFile.loadFileAsString());
+    build(openGLContext, _name, preprocdefines + "\n" + vertFile.loadFileAsString(), preprocdefines + "\n" + fragFile.loadFileAsString());
 }
 
-Shader::Shader(OpenGLContext& openGLContext, String _name, String vertexShader, String fragmentShader)
+Shader::Shader(OpenGLContext& openGLContext, String _name, String vertexShader, String fragmentShader, String preprocdefines)
 {
-    build(openGLContext, _name, vertexShader, fragmentShader);
+    build(openGLContext, _name, preprocdefines + "\n" + vertexShader, preprocdefines + "\n" + fragmentShader);
 }
 
 Shader::~Shader()
