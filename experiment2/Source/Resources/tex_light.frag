@@ -15,10 +15,10 @@
                  void main()  
                  {  
 #if JUCE_OPENGL_ES
-                    highp float l = max (0.3, lightIntensity * 0.3);  
+                    highp float l = max (0.5, lightIntensity * 0.5);  
                     highp vec4 colour =  vec4 (l, l, l, 1.0);  
 #else
-                    float l = max (0.3, lightIntensity * 0.3);  
+                    float l = max (0.5, lightIntensity * 0.5);  
                     vec4 colour = destinationColour * vec4 (l, l, l, 1.0);  
 #endif
                      gl_FragColor = colour * texture2D (demoTexture, textureCoordOut);  

@@ -331,6 +331,7 @@ public:
     Texture* getTextureByName(const String name);
     void setTexture (Texture* t);
     void hideBallMenu();
+    void executeUserMenu(const Button *button, const String name);
     
 private:
     File planeObj;

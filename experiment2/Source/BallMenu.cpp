@@ -24,9 +24,10 @@ BallMenu::BallMenu()
 
 void BallMenu::launch()
 {
+    String names[] = {"unwrap", "callout", "params", "opt1", "opt2", "opt3"};
     for (int i = numIcons; --i >= 0;)
     {
-        Button* b = createButton();
+        Button* b = createButton(names[i]);
         animations.add (b);
         addAndMakeVisible (b);
         b->addListener (this);
@@ -96,13 +97,14 @@ void BallMenu::resized()
     
 }
 
-void BallMenu::buttonClicked (Button*)
+void BallMenu::buttonClicked (Button* button)
 {
     // todo
     Renderer *parent = dynamic_cast<Renderer*>(getParentComponent());
     jassert(parent);
-    if (parent)
-        parent->hideBallMenu();
+//    if (parent)
+//        parent->hideBallMenu();
+    parent->executeUserMenu(button, button->getName());
 }
 
 void BallMenu::mouseDown (const MouseEvent& e)
@@ -114,14 +116,14 @@ void BallMenu::mouseDown (const MouseEvent& e)
         parent->hideBallMenu();
 }
 
-Button* BallMenu::createButton()
+Button* BallMenu::createButton(const String name)
 {
     Image juceIcon = ImageCache::getFromMemory (BinaryData::juce_icon_png,
                                                 BinaryData::juce_icon_pngSize)
     .rescaled (128, 128);
     
     ImageButton* b = new ImageButton ("ImageButton");
-    
+    b->setName(name);
     b->setImages (true, true, true,
                   juceIcon, 1.0f, Colours::transparentBlack,
                   juceIcon, 1.0f, Colours::white,

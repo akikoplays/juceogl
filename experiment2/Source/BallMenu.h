@@ -24,13 +24,13 @@ public:
 
     void paint(Graphics&) override;
     void resized() override;
-    void buttonClicked(Button*) override;
+    void buttonClicked(Button* button) override;
     void mouseDown (const MouseEvent& e) override;
 
     // User defined methods
     void launch();
     void hide();
-    Button* createButton();
+    Button* createButton(const String name);
 
 private:
     int numIcons;

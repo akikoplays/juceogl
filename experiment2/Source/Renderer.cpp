@@ -12,6 +12,7 @@
 #include "BallMenu.h"
 #include "MainWindow.h"
 #include "Renderer.h"
+#include "BackgroundThread.h"
 
 using namespace std;
 
@@ -376,6 +377,35 @@ void Renderer::hideBallMenu()
     if (ballMenu) {
         ballMenu = nullptr;
         mainCaption = "3D Viewer";
+    }
+}
+
+void Renderer::executeUserMenu(const Button *button, const String name)
+{
+//    String names[] = {"unwrap", "callout", "params", "opt1", "opt2", "opt3"};
+    cout << "User menu " << name << " selected" << endl;
+    
+    if (name == "unwrap") {
+        (new BackgroundThread())->launchThread();
+    } else if (name == "callout") {
+        ColourSelector* colourSelector = new ColourSelector();
+        colourSelector->setName ("background");
+        colourSelector->setCurrentColour (findColour (TextButton::buttonColourId));
+        colourSelector->setColour (ColourSelector::backgroundColourId, Colours::transparentBlack);
+        colourSelector->setSize (300, 400);
+        
+        CallOutBox::launchAsynchronously (colourSelector, button->getScreenBounds(), nullptr);
+    } else if (name == "params") {
+        
+    } else if (name == "opt1") {
+        ImageComponent* preview = new ImageComponent();
+        preview->setImage(ImageCache::getFromMemory(BinaryData::uvmap_jpg, BinaryData::uvmap_jpgSize));
+        preview->setSize(512, 512);
+        CallOutBox::launchAsynchronously (preview, button->getScreenBounds(), nullptr);
+    } else if (name == "opt2") {
+        
+    } else if (name == "opt3") {
+        
     }
 }
 
