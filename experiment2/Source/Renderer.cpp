@@ -20,6 +20,35 @@ using namespace std;
 #define RTT_WIDTH 1024
 #define RTT_HEIGHT 1024
 
+#if defined(__APPLE__)
+#warning "Detected APPLE OS"
+std::string CFStringToStdString(CFStringRef yourStringRef)
+{
+    const CFIndex kCStringSize = 128;
+    char temporaryCString[kCStringSize];
+    bzero(temporaryCString,kCStringSize);
+    CFStringGetCString(yourStringRef, temporaryCString, kCStringSize, kCFStringEncodingUTF8);
+    std::string bar = temporaryCString;
+    return bar;
+}
+
+std::string getPath()
+{
+    CFURLRef appUrlRef = CFBundleCopyBundleURL( CFBundleGetMainBundle() );
+    CFStringRef macPath = CFURLCopyFileSystemPath( appUrlRef, kCFURLPOSIXPathStyle );
+    //QString path = CFStringToQString( macPath );
+    std::string filePath = CFStringToStdString(macPath);
+    CFRelease(appUrlRef);
+    CFRelease(macPath);
+    return filePath + "/Contents/Resources/";
+}
+#else
+std::string getPath()
+{
+    return "./Resources/";
+}
+#endif
+
 //==============================================================================
 Renderer::Renderer()
 {
@@ -106,8 +135,9 @@ void Renderer::newOpenGLContextCreated()
 #endif
     
     // Load plane obj used to for RTT processing
-    shape = new Shape(openGLContext, "../../../../Source/Resources/teapot.obj");
-    planeShape = new Shape(openGLContext, "../../../../Source/Resources/plane.obj");
+    
+    shape = new Shape(openGLContext, getPath() + "teapot.obj");
+    planeShape = new Shape(openGLContext, getPath() + "plane.obj");
 
     // Manually load some shaders
     Shader *shader = new Shader(openGLContext, "fsblitter", "../../../../Source/Resources/fsblit", "#define LUMA 0\n#define JUCE_OPENGL_ES 0\n");

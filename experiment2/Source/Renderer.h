@@ -116,14 +116,6 @@ private:
  */
 struct Shape
 {
-    Shape (OpenGLContext& openGLContext)
-    {
-        if (shapeFile.load (BinaryData::teapot_obj).wasOk())
-            for (int i = 0; i < shapeFile.shapes.size(); ++i)
-                vertexBuffers.add (new VertexBuffer (openGLContext, *shapeFile.shapes.getUnchecked(i)));
-        
-    }
-
     Shape (OpenGLContext& openGLContext, String filename)
     {
         if (shapeFile.load(File(filename)).wasOk()) {
