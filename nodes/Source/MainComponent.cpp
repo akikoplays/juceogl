@@ -14,6 +14,50 @@
 using namespace std;
 
 //==============================================================================
+OutletOptionsComponent::OutletOptionsComponent(OutletComponent *_parent)
+{
+    setName("Options");
+    addAndMakeVisible(disconnectAllButton);
+    addAndMakeVisible(disconnectSingleButton);
+    disconnectAllButton.setButtonText("Disconnect All");
+    disconnectSingleButton.setButtonText("Disconnect");
+    disconnectSingleButton.addListener(this);
+    disconnectAllButton.addListener(this);
+    setAlpha(0.5f);
+    parent = _parent;
+}
+
+
+OutletOptionsComponent::~OutletOptionsComponent()
+{
+    
+}
+
+void OutletOptionsComponent::buttonClicked(Button *button)
+{
+    if (button == &disconnectAllButton) {
+        cout << "Disconnect all pressed" << endl;
+        S::getInstance().mainComponent->killAllCablesForOutlet(parent);
+    } else if (button == &disconnectSingleButton) {
+        cout << "Disconnect single pressed" << endl;
+    }
+}
+
+void OutletOptionsComponent::paint(Graphics &g)
+{
+    g.fillAll (getLookAndFeel().findColour (ResizableWindow::backgroundColourId));
+}
+
+void OutletOptionsComponent::resized()
+{
+    Rectangle<int> area(getLocalBounds());
+    Rectangle<int> left (area.removeFromLeft(100));
+    disconnectAllButton.setBounds(left);
+    disconnectSingleButton.setBounds(area.removeFromLeft(100));
+
+}
+
+//==============================================================================
 MainContentComponent::MainContentComponent()
 : selectedOutletA(nullptr), selectedOutletB(nullptr)
 {
@@ -41,37 +85,138 @@ MainContentComponent::~MainContentComponent()
 {
 }
 
-void MainContentComponent::selectOutlet(OutletComponent *outlet)
+bool MainContentComponent::validateConnection(OutletComponent *a, OutletComponent *b)
 {
+    // Rules:
+    // a) type must match
+    // b) direction must be compatible (SOURCE/SINK)
+    cout << "Validate connection.. " << endl;
+    if (a == b) {
+        cout << "-- warning: a == b" << endl;
+        return false;
+    }
+    // Connection between same two outlets already exists?
+    if (getConnectionByOutlets(a, b)) {
+        cout << "-- warning: a/b cable already exists" << endl;
+        return false;
+    }
+    if (a->getDirection() == b->getDirection()) {
+        cout << "-- warning: a and b are of same direction" << endl;
+        return false;
+    }
+    if (a->getType() != b->getType()) {
+        cout << "-- warning: a and b are of same type" << endl;
+        return false;
+    }
+    return true;
+}
+
+bool MainContentComponent::createConnection(OutletComponent *a, OutletComponent *b)
+{
+    cout << "Creating new connection" << endl;
+    Connection *conn = new Connection(a, b);
+    connections.push_back(conn);
+    a->addCable(conn);
+    b->addCable(conn);
+    cout << "-- registered" << endl;
+    return true;
+}
+
+void MainContentComponent::showOutletOptions(OutletComponent *outlet)
+{
+    OutletOptionsComponent *options = new OutletOptionsComponent(outlet);
+    options->setSize(300, 100);
+    auto rect = outlet->getScreenBounds();
+    rect.setY(rect.getY() + 10);
+    CallOutBox::launchAsynchronously(options, rect, nullptr);
+}
+
+void MainContentComponent::selectOutlet(OutletComponent *outlet, bool options)
+{
+    // If outlet was double clicked, we want to show options callout.
+    if (options) {
+        cout << "Dblclick, going into options mode" << endl;
+        showOutletOptions(outlet);
+        
+        return;
+    }
+    
+    // Otherwise, go into outlet selection mode, for establishing new connections
     // Determine whether this is beginning or end of selection
     if (selectedOutletA == nullptr) {
-        // Ok, wait for endpoint 2 now ..
+        // Ok, wait for endpoint 2 now
         selectedOutletA = outlet;
-        selectedOutletA->lock();
     }
     else if (selectedOutletB == nullptr) {
         selectedOutletB = outlet;
-        selectedOutletB->lock();
         
         // Validate connection
-        Connection *conn = new Connection(selectedOutletA, selectedOutletB);
-        connections.push_back(conn);
+        if (validateConnection(selectedOutletA, selectedOutletB)) {
+            createConnection(selectedOutletA, selectedOutletB);
+        }
         
         // If connection successful, release selectedOutlets
         selectedOutletA = nullptr;
         selectedOutletB = nullptr;
     }
-    
-    // todo:
-    // Connection validation logic missing!
-    
+        
     // Force repaint
     repaint();
 }
 
+std::vector<Connection *> MainContentComponent::getConnectionsLinkedToOutlet(OutletComponent *outlet)
+{
+    std::vector<Connection *> list;
+    for (auto it = connections.begin(); it != connections.end(); it++) {
+        Connection *c = *it;
+        if (!c->linksToOutlet(outlet))
+            continue;
+        list.push_back(c);
+    }
+    return list;
+}
+
+bool MainContentComponent::removeAndDeleteConnection(Connection *cable)
+{
+    cout << "Remove and delete a connection" << endl;
+    for (auto it = connections.begin(); it != connections.end(); it++) {
+        Connection *c = *it;
+        if (c != cable)
+            continue;
+        delete(c);
+        connections.erase(it);
+        cout << "-- erased connection" << endl;
+        return true;
+    }
+    return false;
+}
+
+void MainContentComponent::killAllCablesForOutlet(OutletComponent *outlet)
+{
+    cout << "Kill all cables in outlet" << endl;
+    auto list = getConnectionsLinkedToOutlet(outlet);
+    for (auto it = list.begin(); it != list.end(); it++){
+        Connection *c = *it;
+        removeAndDeleteConnection(c);
+    }
+    
+    // For redraw, theater has changed.
+    repaint();
+}
+
+Connection *MainContentComponent::getConnectionByOutlets(OutletComponent *a, OutletComponent *b)
+{
+    for (auto it = connections.begin(); it != connections.end(); it++) {
+        Connection *c = *it;
+        if (c->linksToOutlet(a) && c->linksToOutlet(b))
+            return c;
+    }
+    return nullptr;
+}
+
 void MainContentComponent::mouseMove (const MouseEvent& e)
 {
-    cout << "mouse moves " << e.getPosition().x << ", " << e.getPosition().y << endl;
+//    cout << "mouse moves " << e.getPosition().x << ", " << e.getPosition().y << endl;
 }
 
 

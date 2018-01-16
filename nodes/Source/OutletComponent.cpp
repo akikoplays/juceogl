@@ -10,7 +10,6 @@
 
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "OutletComponent.h"
-#include "MainComponent.h"
 
 using namespace std;
 
@@ -19,6 +18,7 @@ OutletComponent::OutletComponent(OutletDesc::Type type, OutletDesc::Direction di
 {
     // In your constructor, you should add any child components, and
     // initialise any special settings that your component needs.
+//    release();
     desc.type = type;
     desc.direction = direction;
 }
@@ -30,12 +30,12 @@ OutletComponent::~OutletComponent()
 void OutletComponent::mouseDown (const MouseEvent& e)
 {
     cout << "Mouse down on outlet" << endl;
-    if (isLocked()) {
-        cout << "-- already locked, ignore" << endl;
-    } else {
-        cout << "-- selecting outlet" << endl;
+//    if (isLocked()) {
+//        cout << "-- already locked, ignore" << endl;
+//    } else {
+//        cout << "-- selecting outlet" << endl;
         S::getInstance().mainComponent->selectOutlet(this);
-    }
+//    }
 }
 
 void OutletComponent::mouseEnter (const MouseEvent& e)
@@ -43,25 +43,61 @@ void OutletComponent::mouseEnter (const MouseEvent& e)
     cout << "Mouse entered outlet" << endl;
 }
 
-bool OutletComponent::isLocked()
+void OutletComponent::mouseDoubleClick(const MouseEvent &event)
 {
-    return locked;
+    S::getInstance().mainComponent->selectOutlet(this, true);
 }
 
-bool OutletComponent::lock()
+//bool OutletComponent::isLocked()
+//{
+//    return locked;
+//}
+//
+//bool OutletComponent::lock()
+//{
+//    if (locked)
+//        return false;
+//    locked = true;
+//    return true;
+//}
+//
+//bool OutletComponent::release()
+//{
+//    if (locked == false)
+//        return false;
+//    locked = false;
+//    return true;
+//}
+
+bool OutletComponent::addCable(Connection *cable)
 {
-    if (locked)
+    if (hasCable(cable))
         return false;
-    locked = true;
+    
+    cables.push_back(cable);
     return true;
 }
 
-bool OutletComponent::release()
+bool OutletComponent::removeCable(Connection *cable)
 {
-    if (locked == false)
-        return false;
-    locked = false;
-    return true;
+    for (auto it = cables.begin(); it != cables.end(); it++){
+        Connection *c = *it;
+        if (c == cable) {
+            cables.erase(it);
+            return true;
+        }
+    }
+    return false;
+}
+
+void OutletComponent::removeAllCables()
+{
+    cables.clear();
+}
+
+bool OutletComponent::hasCable(Connection *cable)
+{
+    return std::find(cables.begin(), cables.end(), cable) != cables.end();
 }
 
 void OutletComponent::paint (Graphics& g)
@@ -74,7 +110,8 @@ void OutletComponent::paint (Graphics& g)
     */
 
     
-    g.fillAll (isLocked()? Colours::green : Colours::red);   // clear the background
+//    g.fillAll (isLocked()? Colours::green : Colours::red);   // clear the background
+    g.fillAll (isSink()? Colours::blue : Colours::green);   // clear the background
 
     Component *w = findParentComponentOfClass<DocumentWindow>();
     auto wr = w->getBoundsInParent();
