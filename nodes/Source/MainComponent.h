@@ -11,6 +11,7 @@
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "NodeComponent.h"
 #include "OntopComponent.h"
+#include "LibrarianComponent.h"
 
 class OutletComponent;
 
@@ -93,6 +94,7 @@ private:
 //    OntopComponent ontop;
     OutletComponent *selectedOutletA;
     OutletComponent *selectedOutletB;
+    LibrarianComponent librarian;
     OwnedArray<Component> nodes;
     
     std::vector<Connection*> connections;

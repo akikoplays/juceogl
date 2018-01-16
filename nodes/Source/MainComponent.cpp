@@ -10,6 +10,7 @@
 #include "NodeComponent.h"
 #include "OutletComponent.h"
 #include "OntopComponent.h"
+#include "LibrarianComponent.h"
 
 using namespace std;
 
@@ -61,7 +62,7 @@ void OutletOptionsComponent::resized()
 MainContentComponent::MainContentComponent()
 : selectedOutletA(nullptr), selectedOutletB(nullptr)
 {
-    setSize (600, 400);
+    setSize(600, 400);
 
     NodeComponent *node = new NodeComponent();
     addAndMakeVisible(node);
@@ -76,9 +77,18 @@ MainContentComponent::MainContentComponent()
 //    addAndMakeVisible(&ontop);
 //    ontop.setBounds(getLocalBounds());
 //    ontop.setInterceptsMouseClicks(false, false);
+
+    addAndMakeVisible(&librarian);
     
     S::getInstance().mainComponent = this;
     assert(S::getInstance().mainComponent == this);
+    
+    // Test json
+    String jsonstr = "{ \"foo\" : \"bar\", \"num\" : 123, \"nested\" : { \"inner\": \"value\" } }";
+    var json = JSON::fromString(jsonstr);
+    String foo = json["foo"];
+    cout << "foo is : " << foo << endl;
+    cout << "or not" << endl;
 }
 
 MainContentComponent::~MainContentComponent()
@@ -228,6 +238,11 @@ void MainContentComponent::paint (Graphics& g)
     g.setFont (Font (16.0f));
     g.setColour (Colours::white);
     g.drawText ("Hello World!", getLocalBounds(), Justification::centred, true);
+    
+    // Update Librarian position
+    auto r = getLocalBounds();
+    auto lr = r.removeFromRight(200);
+    librarian.setBounds(lr);
     
     // Draw connections
     auto it = connections.begin();
