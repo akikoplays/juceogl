@@ -15,6 +15,22 @@
 //==============================================================================
 /*
 */
+
+struct _OutletDesc
+{
+    String name;
+    String direction;
+    String type;
+    int maxReceivers;
+};
+
+struct ComponentDesc
+{
+    String cid;
+    String name;
+    Array<_OutletDesc> outlets;
+};
+
 class LibrarianComponent    : public Component
 {
 public:
@@ -23,7 +39,11 @@ public:
 
     void paint (Graphics&) override;
     void resized() override;
+    String getAppFolder();
+    void addButton();
 
 private:
+    Array<ComponentDesc> components;
+    OwnedArray<TextButton *> buttons;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LibrarianComponent)
 };

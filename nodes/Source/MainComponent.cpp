@@ -80,15 +80,10 @@ MainContentComponent::MainContentComponent()
 
     addAndMakeVisible(&librarian);
     
+    // Sanity check
     S::getInstance().mainComponent = this;
     assert(S::getInstance().mainComponent == this);
     
-    // Test json
-    String jsonstr = "{ \"foo\" : \"bar\", \"num\" : 123, \"nested\" : { \"inner\": \"value\" } }";
-    var json = JSON::fromString(jsonstr);
-    String foo = json["foo"];
-    cout << "foo is : " << foo << endl;
-    cout << "or not" << endl;
 }
 
 MainContentComponent::~MainContentComponent()

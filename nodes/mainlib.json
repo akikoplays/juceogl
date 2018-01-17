@@ -1,0 +1,27 @@
+{
+  "mains1" : {
+      "name" : "220V Main Bus",
+      "outlets" : 
+        {
+          "out 220" : 
+            {
+              "type" : "bus",
+              "dir" : "out",
+              "max-receivers" : -1
+            },
+          "out 500" : 
+            {
+              "type" : "bus",
+              "dir" : "out",
+              "max-receivers" : -1
+            },
+          "out 600" : 
+            {
+              "type" : "bus",
+              "dir" : "out",
+              "max-receivers" : -1
+            }
+        }
+  }
+}
+
