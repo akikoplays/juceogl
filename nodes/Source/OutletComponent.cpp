@@ -10,15 +10,15 @@
 
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "OutletComponent.h"
+#include "MainComponent.h"
 
 using namespace std;
 
 //==============================================================================
-OutletComponent::OutletComponent(OutletDesc::Type type, OutletDesc::Direction direction)
+OutletComponent::OutletComponent(OutletParamBlock::Type type, OutletParamBlock::Direction direction)
 {
     // In your constructor, you should add any child components, and
     // initialise any special settings that your component needs.
-//    release();
     desc.type = type;
     desc.direction = direction;
 }
@@ -30,12 +30,7 @@ OutletComponent::~OutletComponent()
 void OutletComponent::mouseDown (const MouseEvent& e)
 {
     cout << "Mouse down on outlet" << endl;
-//    if (isLocked()) {
-//        cout << "-- already locked, ignore" << endl;
-//    } else {
-//        cout << "-- selecting outlet" << endl;
-        S::getInstance().mainComponent->selectOutlet(this);
-//    }
+    S::getInstance().mainComponent->selectOutlet(this);
 }
 
 void OutletComponent::mouseEnter (const MouseEvent& e)
@@ -47,27 +42,6 @@ void OutletComponent::mouseDoubleClick(const MouseEvent &event)
 {
     S::getInstance().mainComponent->selectOutlet(this, true);
 }
-
-//bool OutletComponent::isLocked()
-//{
-//    return locked;
-//}
-//
-//bool OutletComponent::lock()
-//{
-//    if (locked)
-//        return false;
-//    locked = true;
-//    return true;
-//}
-//
-//bool OutletComponent::release()
-//{
-//    if (locked == false)
-//        return false;
-//    locked = false;
-//    return true;
-//}
 
 bool OutletComponent::addCable(Connection *cable)
 {
@@ -108,9 +82,7 @@ void OutletComponent::paint (Graphics& g)
        You should replace everything in this method with your own
        drawing code..
     */
-
     
-//    g.fillAll (isLocked()? Colours::green : Colours::red);   // clear the background
     g.fillAll (isSink()? Colours::blue : Colours::green);   // clear the background
 
     Component *w = findParentComponentOfClass<DocumentWindow>();

@@ -11,16 +11,17 @@
 #pragma once
 
 #include "../JuceLibraryCode/JuceHeader.h"
+#include "OutletComponent.h"
 
 //==============================================================================
 /*
 */
 
-struct _OutletDesc
+struct OutletDesc
 {
     String name;
-    String direction;
-    String type;
+    OutletParamBlock::Direction direction;
+    OutletParamBlock::Type type;
     int maxReceivers;
 };
 
@@ -28,22 +29,45 @@ struct ComponentDesc
 {
     String cid;
     String name;
-    Array<_OutletDesc> outlets;
+    Array<OutletDesc> outlets;
 };
 
-class LibrarianComponent    : public Component
+class LibrarianComponent    :   public Component,
+                                public DragAndDropContainer
 {
 public:
+
+    class ComponentButton : public TextButton
+    {
+    public:
+        ComponentButton()
+        {
+            
+        };
+        ~ComponentButton()
+        {
+            
+        };
+        
+        void mouseDrag(const MouseEvent &event) override {
+            findParentDragContainerFor(getParentComponent())->startDragging(var(getName()), this); //for now...
+        }
+    private:
+        
+    };
+
     LibrarianComponent();
     ~LibrarianComponent();
 
     void paint (Graphics&) override;
     void resized() override;
-    String getAppFolder();
-    void addButton();
 
+    String getAppFolder();
+    void addButton(ComponentDesc *cdesc);
+    ComponentDesc *getComponentById(const String cid);
+    
 private:
-    Array<ComponentDesc> components;
-    OwnedArray<TextButton *> buttons;
+    Array<ComponentDesc *> components;
+    OwnedArray<ComponentButton> buttons;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LibrarianComponent)
 };

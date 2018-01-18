@@ -11,11 +11,10 @@
 #pragma once
 
 #include "../JuceLibraryCode/JuceHeader.h"
-#include "MainComponent.h"
 
 class Connection;
 
-class OutletDesc {
+class OutletParamBlock {
 public:
     enum Type {
         POWER_BUS = 0,
@@ -39,7 +38,7 @@ class OutletComponent    : public Component
 {
 public:
     
-    OutletComponent(OutletDesc::Type type, OutletDesc::Direction direction);
+    OutletComponent(OutletParamBlock::Type type, OutletParamBlock::Direction direction);
     ~OutletComponent();
 
     void paint (Graphics&) override;
@@ -48,14 +47,11 @@ public:
     void mouseEnter (const MouseEvent& e) override;
     void mouseDoubleClick(const MouseEvent &event) override;
     
-//    bool isLocked();
-//    bool lock();
-//    bool release();
     Point<int> getWindowPos();
-    bool isSource() {return desc.direction == OutletDesc::Direction::SOURCE;};
-    bool isSink() {return desc.direction == OutletDesc::Direction::SINK;};
-    OutletDesc::Type getType() {return desc.type;};
-    OutletDesc::Direction getDirection() {return desc.direction;};
+    bool isSource() {return desc.direction == OutletParamBlock::Direction::SOURCE;};
+    bool isSink() {return desc.direction == OutletParamBlock::Direction::SINK;};
+    OutletParamBlock::Type getType() {return desc.type;};
+    OutletParamBlock::Direction getDirection() {return desc.direction;};
     bool addCable(Connection *cable);
     // Removes specific cable. Warning: doesn't deallocate it!
     bool removeCable(Connection *cable);
@@ -71,7 +67,7 @@ public:
 private:
     // Each connection established with the outlet is added to this vector.
     std::vector<Connection *> cables;
-    OutletDesc desc;
+    OutletParamBlock desc;
     bool locked;
     Point<int> windowPosition;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OutletComponent)

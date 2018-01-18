@@ -12,13 +12,16 @@
 
 #include "../JuceLibraryCode/JuceHeader.h"
 
+class ComponentDesc;
+
 //==============================================================================
 /*
 */
 class NodeComponent    : public Component
 {
 public:
-    NodeComponent();
+    // Create node according to the descriptor received from LibrarianComponent via drag and drop.
+    NodeComponent(ComponentDesc *_desc);
     ~NodeComponent();
 
     void paint (Graphics&) override;
@@ -30,5 +33,6 @@ private:
     OwnedArray<Component> outlets;
     ComponentDragger dragger;
     ComponentBoundsConstrainer constrainer;
+    ComponentDesc *desc;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NodeComponent)
 };

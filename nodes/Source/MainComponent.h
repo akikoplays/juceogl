@@ -9,9 +9,9 @@
 #pragma once
 
 #include "../JuceLibraryCode/JuceHeader.h"
+#include "LibrarianComponent.h"
 #include "NodeComponent.h"
 #include "OntopComponent.h"
-#include "LibrarianComponent.h"
 
 class OutletComponent;
 
@@ -62,7 +62,9 @@ private:
     This component lives inside our window, and this is where you should put all
     your controls and content.
 */
-class MainContentComponent   : public Component
+class MainContentComponent   :  public Component,
+                                public DragAndDropTarget,
+                                public DragAndDropContainer
 {
 public:
     //==============================================================================
@@ -72,7 +74,12 @@ public:
     void paint (Graphics&) override;
     void resized() override;
     void mouseMove (const MouseEvent& e) override;
-    
+    bool isInterestedInDragSource (const SourceDetails& /*dragSourceDetails*/) override;
+    void itemDragEnter (const SourceDetails& /*dragSourceDetails*/) override;
+    void itemDragMove (const SourceDetails& /*dragSourceDetails*/) override;
+    void itemDragExit (const SourceDetails& /*dragSourceDetails*/) override;
+    void itemDropped (const SourceDetails& dragSourceDetails) override;
+
     // Selects the given outlet as A or B endpoint of future connection.
     void selectOutlet(OutletComponent *outlet, bool options = false);
     // Validates connection following predefined set of rules, and returns true if it's ok.
@@ -96,9 +103,10 @@ private:
     OutletComponent *selectedOutletB;
     LibrarianComponent librarian;
     OwnedArray<Component> nodes;
-    
+
     std::vector<Connection*> connections;
-    
+    bool somethingIsBeingDraggedOver;
+
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainContentComponent)
 };

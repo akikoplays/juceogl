@@ -51,14 +51,14 @@ LibrarianComponent::LibrarianComponent()
                 var child (props[id]);
                 jassert (! child.isVoid());
 
-                ComponentDesc cdesc;
-                cdesc.cid = props.getName(i).toString();
+                ComponentDesc *cdesc = new ComponentDesc();
+                cdesc->cid = props.getName(i).toString();
                 
                 NamedValueSet& subprops (child.getDynamicObject()->getProperties());
                 for (int i = 0; i < subprops.size(); ++i)
                 {
                     if (subprops.getName(i).toString() == "name") {
-                        cdesc.name = props.getName(i).toString();
+                        cdesc->name = props.getName(i).toString();
                     }
                     
                     cout << "-- " << subprops.getName(i).toString() << ": " << subprops.getValueAt(i).toString() << endl;
@@ -78,7 +78,7 @@ LibrarianComponent::LibrarianComponent()
                             var child (subprops[id]);
                             jassert (! child.isVoid());
 
-                            _OutletDesc odesc;
+                            OutletDesc odesc;
                             odesc.name = subprops.getName(i).toString();
 
                             // Parse outlet properties
@@ -90,14 +90,26 @@ LibrarianComponent::LibrarianComponent()
                                 
                                 // Should strongly typed conversion be done here? hmm..
                                 // or just map all the values, and then convert else where.
-                                if (subprops.getName(i).toString() == "type")
-                                    odesc.type = subprops.getValueAt(i).toString();
-                                else if (subprops.getName(i).toString() == "dir")
-                                    odesc.direction = subprops.getValueAt(i).toString();
+                                if (subprops.getName(i).toString() == "type") {
+//                                    odesc.type = subprops.getValueAt(i).toString();
+                                    if (subprops.getValueAt(i).toString() == "bus")
+                                        odesc.type = OutletParamBlock::Type::POWER_BUS;
+                                    else if (subprops.getValueAt(i).toString() == "binary")
+                                        odesc.type = OutletParamBlock::Type::BINARY;
+                                    else if (subprops.getValueAt(i).toString() == "comm")
+                                        odesc.type = OutletParamBlock::Type::COMM;
+                                }
+                                else if (subprops.getName(i).toString() == "dir"){
+//                                    odesc.direction = subprops.getValueAt(i).toString();
+                                    if (subprops.getValueAt(i).toString() == "in")
+                                        odesc.direction = OutletParamBlock::Direction::SOURCE;
+                                    else if (subprops.getValueAt(i).toString() == "out")
+                                        odesc.direction = OutletParamBlock::Direction::SINK;
+                                }
                                 else if (subprops.getName(i).toString() == "max-receivers")
                                     odesc.maxReceivers = subprops.getValueAt(i);
                             }
-                            cdesc.outlets.add(odesc);
+                            cdesc->outlets.add(odesc);
                         }
                     }
                 }
@@ -106,21 +118,27 @@ LibrarianComponent::LibrarianComponent()
         }
     }
     
-    // Debug print collected component descriptors
+    // Print collected component descriptors and create buttons for each
     for (int i=0; i<components.size(); i++) {
-        cout << i << ": " << components[i].name << endl;
-        for (int j=0; j<components[i].outlets.size(); j++) {
-            cout << "\t" << j << ": " << components[i].outlets[j].name << endl;
-            cout << "\t" << "-- type: " << components[i].outlets[j].type << endl;
-            cout << "\t" << "-- dir: " << components[i].outlets[j].direction << endl;
-            cout << "\t" << "-- max-receivers: " << components[i].outlets[j].maxReceivers << endl;
+        cout << i << ": " << components[i]->name << endl;
+        for (int j=0; j<components[i]->outlets.size(); j++) {
+            cout << "\t" << j << ": " << components[i]->outlets[j].name << endl;
+            cout << "\t" << "-- type: " << components[i]->outlets[j].type << endl;
+            cout << "\t" << "-- dir: " << components[i]->outlets[j].direction << endl;
+            cout << "\t" << "-- max-receivers: " << components[i]->outlets[j].maxReceivers << endl;
         }
+        addButton(components[i]);
     }
     return;
 }
 
 LibrarianComponent::~LibrarianComponent()
 {
+    // Deallocate all descriptors
+    for (int i=0; i<components.size(); i++) {
+        ComponentDesc *cd = components[i];
+        delete(cd);
+    }
 }
 
 void LibrarianComponent::paint (Graphics& g)
@@ -147,10 +165,31 @@ void LibrarianComponent::resized()
 {
     // This method is where you should set the bounds of any child
     // components that your component contains..
-
+    
+    int buttonHeight = 40;
+    auto r = getLocalBounds();
+    for (int i=0; i<buttons.size(); i++) {
+        TextButton *b = buttons[i];
+        auto p = r.removeFromTop(buttonHeight);
+        b->setBounds(p);
+        addAndMakeVisible(b);
+    }
 }
 
-void LibrarianComponent::addButton()
+void LibrarianComponent::addButton(ComponentDesc *cdesc)
 {
-    
+    ComponentButton *b = new ComponentButton();
+    b->setButtonText(cdesc->name);
+    b->setName(cdesc->cid);
+    buttons.add(b);
+}
+
+ComponentDesc *LibrarianComponent::getComponentById(const String cid)
+{
+    for (int i=0; i<components.size(); i++) {
+        ComponentDesc *cd = components[i];
+        if (cd->cid == cid)
+            return cd;
+    }
+    return nullptr;
 }

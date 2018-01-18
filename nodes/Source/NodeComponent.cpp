@@ -11,22 +11,35 @@
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "MainComponent.h"
 #include "OutletComponent.h"
+#include "LibrarianComponent.h"
 #include "NodeComponent.h"
 
+using namespace std;
+
 //==============================================================================
-NodeComponent::NodeComponent()
+NodeComponent::NodeComponent(ComponentDesc *_desc)
 {
     // In your constructor, you should add any child components, and
     // initialise any special settings that your component needs.
 
-    OutletComponent *pin = new OutletComponent(OutletDesc::Type::POWER_BUS, OutletDesc::Direction::SOURCE);
-    addAndMakeVisible(pin);
-    outlets.add(pin);
+//    OutletComponent *pin = new OutletComponent(OutletDesc::Type::POWER_BUS, OutletDesc::Direction::SOURCE);
+//    addAndMakeVisible(pin);
+//    outlets.add(pin);
+//
+//    pin = new OutletComponent(OutletDesc::Type::POWER_BUS, OutletDesc::Direction::SINK);
+//    addAndMakeVisible(pin);
+//    outlets.add(pin);
 
-    pin = new OutletComponent(OutletDesc::Type::POWER_BUS, OutletDesc::Direction::SINK);
-    addAndMakeVisible(pin);
-    outlets.add(pin);
-
+    desc = _desc;
+    
+    cout << "Creating node instance for: " << desc->name << endl;
+    
+    for (int i=0; i<desc->outlets.size(); i++) {
+        // Note that pins have the same order as the desc->outlets[] array.
+        OutletComponent *pin = new OutletComponent(desc->outlets[i].type, desc->outlets[i].direction);
+        addAndMakeVisible(pin);
+        outlets.add(pin);
+    }
 }
 
 NodeComponent::~NodeComponent()
@@ -46,26 +59,31 @@ void NodeComponent::paint (Graphics& g)
     r.reduce(10,10);
     g.setColour(getLookAndFeel().findColour (ResizableWindow::backgroundColourId));
     g.fillRect(r);
-//    g.fillAll (getLookAndFeel().findColour (ResizableWindow::backgroundColourId));   // clear the background
 
     g.setColour (Colours::grey);
     g.drawRect (r, 1);   // draw an outline around the component
 
     g.setColour (Colours::white);
     g.setFont (10.0f);
-    g.drawText ("NodeComponent", getLocalBounds(),
+    g.drawText (desc->name, getLocalBounds(),
                 Justification::centred, true);   // draw some placeholder text
     
-    // Sink
-    r = getLocalBounds();
-    Rectangle<int> sink;
-    sink.setBounds(0, r.getHeight()/2-5, 10, 10);
-    outlets[0]->setBounds(sink);
-    // Src
-    r = getLocalBounds();
-    Rectangle<int> src;
-    src.setBounds(r.getWidth()-10, r.getHeight()/2-5, 10, 10);
-    outlets[1]->setBounds(src);
+//    // Sink
+//    r = getLocalBounds();
+//    Rectangle<int> sink;
+//    sink.setBounds(0, r.getHeight()/2-5, 10, 10);
+//    outlets[0]->setBounds(sink);
+//    // Src
+//    r = getLocalBounds();
+//    Rectangle<int> src;
+//    src.setBounds(r.getWidth()-10, r.getHeight()/2-5, 10, 10);
+//    outlets[1]->setBounds(src);
+    
+    // TODO:
+    // Dynamically painted outlets based on their descriptors
+    for (int i=0; i<desc->outlets.size(); i++) {
+        
+    }
 }
 
 void NodeComponent::resized()
