@@ -22,6 +22,18 @@
               "max-receivers" : -1
             }
         }
+  },
+  "motor1" : {
+      "name" : "220V Stepper",
+      "outlets" : 
+        {
+          "in 220" : 
+            {
+              "type" : "bus",
+              "dir" : "in",
+            }
+        }
   }
+
 }
 

@@ -58,7 +58,7 @@ LibrarianComponent::LibrarianComponent()
                 for (int i = 0; i < subprops.size(); ++i)
                 {
                     if (subprops.getName(i).toString() == "name") {
-                        cdesc->name = props.getName(i).toString();
+                        cdesc->name = subprops.getValueAt(i).toString();
                     }
                     
                     cout << "-- " << subprops.getName(i).toString() << ": " << subprops.getValueAt(i).toString() << endl;

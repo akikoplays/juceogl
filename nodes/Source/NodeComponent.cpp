@@ -81,8 +81,31 @@ void NodeComponent::paint (Graphics& g)
     
     // TODO:
     // Dynamically painted outlets based on their descriptors
-    for (int i=0; i<desc->outlets.size(); i++) {
-        
+    
+    int h = 10, w = 10;
+    r = getLocalBounds();
+    int numSrcs = 0;
+    for (int i=0; i<outlets.size(); i++)
+        numSrcs = desc->outlets[i].direction == OutletParamBlock::Direction::SOURCE ? numSrcs + 1 : numSrcs;
+    int numSinks = outlets.size() - numSrcs;
+    int sinkstarty = r.getHeight()/2-h/2 - numSinks/2 * (h+2);
+    int stepy = h + 2;
+    int srcstarty = r.getHeight()/2-h/2 - numSrcs/2 * (h+2);
+
+    for (int i=0; i<outlets.size(); i++) {
+        Rectangle<int> src;
+        int startx = 0;
+        if (desc->outlets[i].direction == OutletParamBlock::Direction::SINK) {
+            startx = r.getWidth()-10;
+            src.setBounds(startx, sinkstarty, w, h);
+            outlets[i]->setBounds(src);
+            sinkstarty += stepy;
+        } else {
+            startx = 0;
+            src.setBounds(startx, srcstarty, w, h);
+            outlets[i]->setBounds(src);
+            srcstarty += stepy;
+        }
     }
 }
 
