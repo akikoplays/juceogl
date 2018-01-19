@@ -15,6 +15,8 @@
 using namespace std;
 
 //==============================================================================
+#pragma mark OutletOptionsComponent
+
 OutletOptionsComponent::OutletOptionsComponent(OutletComponent *_parent)
 {
     setName("Options");
@@ -42,6 +44,7 @@ void OutletOptionsComponent::buttonClicked(Button *button)
     } else if (button == &disconnectSingleButton) {
         cout << "Disconnect single pressed" << endl;
     }
+    S::getInstance().mainComponent->hideOptionsCallout();
 }
 
 void OutletOptionsComponent::paint(Graphics &g)
@@ -59,20 +62,53 @@ void OutletOptionsComponent::resized()
 }
 
 //==============================================================================
+#pragma mark NodeOptionsComponent
+NodeOptionsComponent::NodeOptionsComponent(NodeComponent *_parent)
+{
+    setName("NodeOptions");
+    addAndMakeVisible(deleteButton);
+    deleteButton.setButtonText("Delete Node");
+    deleteButton.addListener(this);
+    setAlpha(0.5f);
+    parent = _parent;
+}
+
+
+NodeOptionsComponent::~NodeOptionsComponent()
+{
+    
+}
+
+void NodeOptionsComponent::buttonClicked(Button *button)
+{
+    if (button == &deleteButton) {
+        cout << "Delete Node pressed" << endl;
+        // TODO:
+        S::getInstance().mainComponent->removeAndDeleteNode(parent);
+    }
+    S::getInstance().mainComponent->hideOptionsCallout();
+}
+
+void NodeOptionsComponent::paint(Graphics &g)
+{
+    g.fillAll (getLookAndFeel().findColour (ResizableWindow::backgroundColourId));
+}
+
+void NodeOptionsComponent::resized()
+{
+    Rectangle<int> area(getLocalBounds());
+    Rectangle<int> left (area.removeFromLeft(100));
+    deleteButton.setBounds(left);
+    
+}
+
+//==============================================================================
+#pragma mark MainContentComponent
+
 MainContentComponent::MainContentComponent()
-: selectedOutletA(nullptr), selectedOutletB(nullptr), somethingIsBeingDraggedOver(false)
+: selectedOutletA(nullptr), selectedOutletB(nullptr), somethingIsBeingDraggedOver(false), optionsCallout(nullptr)
 {
     setSize(600, 400);
-
-//    NodeComponent *node = new NodeComponent();
-//    addAndMakeVisible(node);
-//    nodes.add(node);
-//    node->setBounds(100, 100, 100, 100);
-//
-//    node = new NodeComponent();
-//    addAndMakeVisible(node);
-//    nodes.add(node);
-//    node->setBounds(300, 300, 100, 100);
     
 //    addAndMakeVisible(&ontop);
 //    ontop.setBounds(getLocalBounds());
@@ -84,6 +120,8 @@ MainContentComponent::MainContentComponent()
     S::getInstance().mainComponent = this;
     assert(S::getInstance().mainComponent == this);
     
+    // Main update timer used for animating elements on screen
+    startTimerHz(50);
 }
 
 MainContentComponent::~MainContentComponent()
@@ -127,13 +165,35 @@ bool MainContentComponent::createConnection(OutletComponent *a, OutletComponent 
     return true;
 }
 
+
 void MainContentComponent::showOutletOptions(OutletComponent *outlet)
 {
     OutletOptionsComponent *options = new OutletOptionsComponent(outlet);
     options->setSize(300, 100);
     auto rect = outlet->getScreenBounds();
     rect.setY(rect.getY() + 10);
-    CallOutBox::launchAsynchronously(options, rect, nullptr);
+    optionsCallout = &CallOutBox::launchAsynchronously(options, rect, nullptr);
+}
+
+void MainContentComponent::showNodeOptions(NodeComponent *node)
+{
+    NodeOptionsComponent *options = new NodeOptionsComponent(node);
+    options->setSize(300, 100);
+    auto rect = node->getScreenBounds();
+    rect.setY(rect.getY() + 10);
+    optionsCallout = &CallOutBox::launchAsynchronously(options, rect, nullptr);
+}
+
+void MainContentComponent::selectNode(NodeComponent *node, bool options)
+{
+    // If node was double clicked, we want to show options callout.
+    if (options) {
+        cout << "Dblclick, going into options mode" << endl;
+        showNodeOptions(node);
+        return;
+    }
+    // TODO:
+    // implement node selection logic
 }
 
 void MainContentComponent::selectOutlet(OutletComponent *outlet, bool options)
@@ -151,6 +211,7 @@ void MainContentComponent::selectOutlet(OutletComponent *outlet, bool options)
     if (selectedOutletA == nullptr) {
         // Ok, wait for endpoint 2 now
         selectedOutletA = outlet;
+        outlet->signalize(Colours::white, true);
     }
     else if (selectedOutletB == nullptr) {
         selectedOutletB = outlet;
@@ -160,7 +221,9 @@ void MainContentComponent::selectOutlet(OutletComponent *outlet, bool options)
             createConnection(selectedOutletA, selectedOutletB);
         }
         
-        // If connection successful, release selectedOutlets
+        // If connection successful, release selectedOutlets, and stop signaling on them
+        selectedOutletA->signalize(Colours::white, false);
+        selectedOutletB->signalize(Colours::white, false);
         selectedOutletA = nullptr;
         selectedOutletB = nullptr;
     }
@@ -198,15 +261,43 @@ bool MainContentComponent::removeAndDeleteConnection(Connection *cable)
 
 void MainContentComponent::killAllCablesForOutlet(OutletComponent *outlet)
 {
-    cout << "Kill all cables in outlet" << endl;
+    cout << "Kill all cables for outlet " << outlet->getName() <<  endl;
     auto list = getConnectionsLinkedToOutlet(outlet);
-    for (auto it = list.begin(); it != list.end(); it++){
+    static int i = 0;
+    for (auto it = list.begin(); it != list.end(); it++, i++){
         Connection *c = *it;
         removeAndDeleteConnection(c);
+        cout << "-- killed cable " << i << endl;
     }
     
     // For redraw, theater has changed.
     repaint();
+}
+
+void MainContentComponent::killAllCablesForNode(NodeComponent *node)
+{
+    cout << "Kill all cables for node " << node->getName() <<  endl;
+    const OwnedArray<OutletComponent> &outlets = node->getOutlets();
+    for (int i=0; i<outlets.size(); i++) {
+        killAllCablesForOutlet(outlets[i]);
+    }
+}
+
+void MainContentComponent::removeAndDeleteNode(NodeComponent *node)
+{
+    cout << "Deleting node: " << node->getName() << endl;
+    
+    for (int i=0; i<nodes.size(); i++) {
+        if(nodes[i] != node)
+            continue;
+        cout << "-- found"<<endl;
+        
+        // Detach all cables from this node.
+        killAllCablesForNode(node);
+        // note that remove() will call object's destructor.
+        nodes.remove(i);
+
+    }
 }
 
 Connection *MainContentComponent::getConnectionByOutlets(OutletComponent *a, OutletComponent *b)
@@ -217,6 +308,14 @@ Connection *MainContentComponent::getConnectionByOutlets(OutletComponent *a, Out
             return c;
     }
     return nullptr;
+}
+
+void MainContentComponent::hideOptionsCallout()
+{
+    if (optionsCallout == nullptr)
+        return;
+    optionsCallout->dismiss();
+    optionsCallout = nullptr;
 }
 
 void MainContentComponent::mouseMove (const MouseEvent& e)
@@ -325,3 +424,7 @@ void MainContentComponent::itemDropped (const SourceDetails& dragSourceDetails)
     repaint();
 }
 
+void MainContentComponent::timerCallback()
+{
+    
+}

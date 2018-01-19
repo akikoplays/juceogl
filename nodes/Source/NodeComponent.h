@@ -28,9 +28,12 @@ public:
     void resized() override;
     void mouseDown (const MouseEvent& e) override;
     void mouseDrag (const MouseEvent& e) override;
+    void mouseDoubleClick(const MouseEvent &event) override;
+
+    const OwnedArray<OutletComponent>& getOutlets();
 
 private:
-    OwnedArray<Component> outlets;
+    OwnedArray<OutletComponent> outlets;
     ComponentDragger dragger;
     ComponentBoundsConstrainer constrainer;
     ComponentDesc *desc;

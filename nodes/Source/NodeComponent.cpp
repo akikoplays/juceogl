@@ -33,6 +33,7 @@ NodeComponent::NodeComponent(ComponentDesc *_desc)
     desc = _desc;
     
     cout << "Creating node instance for: " << desc->name << endl;
+    setName(desc->name);
     
     for (int i=0; i<desc->outlets.size(); i++) {
         // Note that pins have the same order as the desc->outlets[] array.
@@ -44,6 +45,7 @@ NodeComponent::NodeComponent(ComponentDesc *_desc)
 
 NodeComponent::~NodeComponent()
 {
+    cout << "Node " << getName() << " deconstructor called" << endl;
 }
 
 void NodeComponent::paint (Graphics& g)
@@ -129,3 +131,13 @@ void NodeComponent::mouseDrag (const MouseEvent& e)
     dragger.dragComponent (this, e, &constrainer);
     S::getInstance().mainComponent->repaint();
 }
+
+void NodeComponent::mouseDoubleClick(const MouseEvent &event)
+{
+    S::getInstance().mainComponent->selectNode(this, true);
+}
+
+const OwnedArray<OutletComponent>& NodeComponent::getOutlets()
+{
+    return outlets;
+};

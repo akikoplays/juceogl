@@ -34,7 +34,8 @@ public:
 //==============================================================================
 /*
 */
-class OutletComponent    : public Component
+class OutletComponent    :  public Component,
+                            private Timer
 {
 public:
     
@@ -46,7 +47,8 @@ public:
     void mouseDown (const MouseEvent& e) override;
     void mouseEnter (const MouseEvent& e) override;
     void mouseDoubleClick(const MouseEvent &event) override;
-    
+    void timerCallback() override;
+
     Point<int> getWindowPos();
     bool isSource() {return desc.direction == OutletParamBlock::Direction::SOURCE;};
     bool isSink() {return desc.direction == OutletParamBlock::Direction::SINK;};
@@ -63,12 +65,17 @@ public:
     bool hasCable(Connection *cable);
     // Returns true if outlet contains cables.
     bool isConnected(){return cables.size() > 0;};
+    void signalize(Colour c, bool ena);
     
 private:
     // Each connection established with the outlet is added to this vector.
     std::vector<Connection *> cables;
     OutletParamBlock desc;
-    bool locked;
+    bool signalizing;
+    bool signalState;
+    Colour signalColor;
+    Colour baseColor;
+    Colour activeColor;
     Point<int> windowPosition;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OutletComponent)
 };

@@ -14,6 +14,7 @@
 
 using namespace std;
 
+#define BLINK_FREQ_HZ 4
 //==============================================================================
 OutletComponent::OutletComponent(OutletParamBlock::Type type, OutletParamBlock::Direction direction)
 {
@@ -21,6 +22,13 @@ OutletComponent::OutletComponent(OutletParamBlock::Type type, OutletParamBlock::
     // initialise any special settings that your component needs.
     desc.type = type;
     desc.direction = direction;
+    signalizing = false;
+    signalState = false;
+    if (direction == OutletParamBlock::Direction::SINK)
+        baseColor = Colours::green;
+    else
+        baseColor = Colours::blue;
+    activeColor = baseColor;
 }
 
 OutletComponent::~OutletComponent()
@@ -83,8 +91,8 @@ void OutletComponent::paint (Graphics& g)
        drawing code..
     */
     
-    g.fillAll (isSink()? Colours::blue : Colours::green);   // clear the background
-
+//    g.fillAll (isSink()? Colours::blue : Colours::green);   // clear the background
+    g.fillAll (activeColor);   // clear the background
     Component *w = findParentComponentOfClass<DocumentWindow>();
     auto wr = w->getBoundsInParent();
     Point<int> ret(0,0);
@@ -109,4 +117,30 @@ Point<int> OutletComponent::getWindowPos()
 //
 //    cout << "outlet pos: " << r.getX() + r2.getX() << " " << r.getY() + r2.getY() << endl;
 //    return Point<int>(r.getX() + r2.getX() + getWidth()/2, r.getY() + r2.getY() + getHeight()/2);
+}
+
+void OutletComponent::timerCallback()
+{
+    if (signalizing) {
+        if (signalState)
+            activeColor = signalColor;
+        else
+            activeColor = baseColor;
+        signalState = signalState ? false : true;
+    }
+    repaint();
+}
+
+void OutletComponent::signalize(Colour c, bool ena)
+{
+    if (ena == false) {
+        signalizing = false;
+        activeColor = baseColor;
+        stopTimer();
+    } else {
+        signalColor = c;
+        signalizing = true;
+        signalState = true;
+        startTimerHz(BLINK_FREQ_HZ);
+    }
 }
