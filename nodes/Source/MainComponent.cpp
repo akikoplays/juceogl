@@ -106,9 +106,9 @@ void NodeOptionsComponent::resized()
 #pragma mark MainContentComponent
 
 MainContentComponent::MainContentComponent()
-: selectedOutletA(nullptr), selectedOutletB(nullptr), somethingIsBeingDraggedOver(false), optionsCallout(nullptr)
+: selectedOutletA(nullptr), selectedOutletB(nullptr), optionsCallout(nullptr), somethingIsBeingDraggedOver(false)
 {
-    setSize(600, 400);
+    setSize(1200, 800);
     
 //    addAndMakeVisible(&ontop);
 //    ontop.setBounds(getLocalBounds());
@@ -148,7 +148,16 @@ bool MainContentComponent::validateConnection(OutletComponent *a, OutletComponen
         return false;
     }
     if (a->getType() != b->getType()) {
-        cout << "-- warning: a and b are of same type" << endl;
+        cout << "-- warning: a and b are not of same type" << endl;
+        return false;
+    }
+    // Does SOURCE outlet already has a connection?
+    if (a->isSource() && getConnectionsLinkedToOutlet(a).size() > 0) {
+        cout << "-- warning: a is SOURCE and already has a cable attached " << endl;
+        return false;
+    }
+    if (b->isSource() && getConnectionsLinkedToOutlet(b).size() > 0) {
+        cout << "-- warning: b is SOURCE and already has a cable attached " << endl;
         return false;
     }
     return true;
