@@ -12,6 +12,7 @@
 #include "LibrarianComponent.h"
 #include "NodeComponent.h"
 #include "OntopComponent.h"
+#include "LayoutComponent.h"
 
 class OutletComponent;
 
@@ -85,7 +86,7 @@ private:
     your controls and content.
 */
 class MainContentComponent   :  public Component,
-                                public DragAndDropTarget,
+//                                public DragAndDropTarget,
                                 public DragAndDropContainer,
                                 private Timer
 {
@@ -97,11 +98,6 @@ public:
     void paint (Graphics&) override;
     void resized() override;
     void mouseMove (const MouseEvent& e) override;
-    bool isInterestedInDragSource (const SourceDetails& /*dragSourceDetails*/) override;
-    void itemDragEnter (const SourceDetails& /*dragSourceDetails*/) override;
-    void itemDragMove (const SourceDetails& /*dragSourceDetails*/) override;
-    void itemDragExit (const SourceDetails& /*dragSourceDetails*/) override;
-    void itemDropped (const SourceDetails& dragSourceDetails) override;
     void timerCallback() override;
 
     // Selects the given outlet as A or B endpoint of future connection, opens options callout if options = true.
@@ -112,6 +108,8 @@ public:
     bool validateConnection(OutletComponent *a, OutletComponent *b);
     // Creates and registers new connection object.
     bool createConnection(OutletComponent *a, OutletComponent *b);
+    // Return list of cables.
+    std::vector<Connection*> getConnections() {return connections;};
     // Removes specific connection from vector, calls delete().
     bool removeAndDeleteConnection(Connection *cable);
     // Remove and delete specific Node.
@@ -130,15 +128,22 @@ public:
     Connection *getConnectionByOutlets(OutletComponent *a, OutletComponent *b);
     // Hide optionsCalloutBox, if there. If not - ignore.
     void hideOptionsCallout();
+    // Add node to internal list.
+    void addNode(NodeComponent *node) {
+        nodes.add(node);
+    };
+    LibrarianComponent *getLibrarian() {
+        return librarian;
+    };
     
 private:
 //    OntopComponent ontop;
     CallOutBox *optionsCallout;
     OutletComponent *selectedOutletA;
     OutletComponent *selectedOutletB;
-    LibrarianComponent librarian;
+    ScopedPointer<LibrarianComponent> librarian;
+    ScopedPointer<LayoutComponent> layout;
     OwnedArray<NodeComponent> nodes;
-
     std::vector<Connection*> connections;
     bool somethingIsBeingDraggedOver;
 
@@ -156,6 +161,11 @@ public:
         return instance;
     }
     
+    // Shorter way to get mainComponent from Singleton.
+    static MainContentComponent *getMainComponent()
+    {
+        return S::getInstance().mainComponent;
+    }
     
 private:
     S() {mainComponent = nullptr;}                    // Constructor? (the {} brackets) are needed here.

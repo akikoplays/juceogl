@@ -123,18 +123,27 @@ void NodeComponent::mouseDown (const MouseEvent& e)
 {
     // Prepares our dragger to drag this Component
     dragger.startDraggingComponent (this, e);
+    mouseDownStartTime = Time::getCurrentTime().toMilliseconds();
+}
+
+void NodeComponent::mouseUp (const MouseEvent& e)
+{
+    // Take it as single click
+    if (Time::getCurrentTime().toMilliseconds() - mouseDownStartTime < 180) {
+        cout << "Selected." << endl;
+    }
 }
 
 void NodeComponent::mouseDrag (const MouseEvent& e)
 {
     // Moves this Component according to the mouse drag event and applies our constraints to it
     dragger.dragComponent (this, e, &constrainer);
-    S::getInstance().mainComponent->repaint();
+    S::getMainComponent()->repaint();
 }
 
 void NodeComponent::mouseDoubleClick(const MouseEvent &event)
 {
-    S::getInstance().mainComponent->selectNode(this, true);
+    S::getMainComponent()->selectNode(this, true);
 }
 
 const OwnedArray<OutletComponent>& NodeComponent::getOutlets()

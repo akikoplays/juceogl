@@ -27,6 +27,7 @@ public:
     void paint (Graphics&) override;
     void resized() override;
     void mouseDown (const MouseEvent& e) override;
+    void mouseUp (const MouseEvent& e) override;
     void mouseDrag (const MouseEvent& e) override;
     void mouseDoubleClick(const MouseEvent &event) override;
 
@@ -37,5 +38,6 @@ private:
     ComponentDragger dragger;
     ComponentBoundsConstrainer constrainer;
     ComponentDesc *desc;
+    int64 mouseDownStartTime;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NodeComponent)
 };

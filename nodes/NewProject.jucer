@@ -6,6 +6,10 @@
               cppLanguageStandard="11" companyCopyright="" jucerVersion="5.2.0">
   <MAINGROUP id="nGcs36" name="nodes">
     <GROUP id="{CDB02263-A6B1-8F29-82EC-6B7D7210BF17}" name="Source">
+      <FILE id="cKMQl3" name="LayoutComponent.cpp" compile="1" resource="0"
+            file="Source/LayoutComponent.cpp"/>
+      <FILE id="mAd1ZU" name="LayoutComponent.h" compile="0" resource="0"
+            file="Source/LayoutComponent.h"/>
       <FILE id="w1gwFo" name="LibrarianComponent.cpp" compile="1" resource="0"
             file="Source/LibrarianComponent.cpp"/>
       <FILE id="HYGwi9" name="LibrarianComponent.h" compile="0" resource="0"

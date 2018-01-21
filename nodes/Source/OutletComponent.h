@@ -66,6 +66,8 @@ public:
     // Returns true if outlet contains cables.
     bool isConnected(){return cables.size() > 0;};
     void signalize(Colour c, bool ena);
+    // Return the offset from outlet to first cable twist.
+    Point<int> getStrainReliefPos();
     
 private:
     // Each connection established with the outlet is added to this vector.

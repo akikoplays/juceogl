@@ -15,6 +15,8 @@
 using namespace std;
 
 #define BLINK_FREQ_HZ 4
+#define STRAIN_RELIEF_OFFSET 20 // Offset in pixels
+
 //==============================================================================
 OutletComponent::OutletComponent(OutletParamBlock::Type type, OutletParamBlock::Direction direction)
 {
@@ -38,7 +40,7 @@ OutletComponent::~OutletComponent()
 void OutletComponent::mouseDown (const MouseEvent& e)
 {
     cout << "Mouse down on outlet" << endl;
-    S::getInstance().mainComponent->selectOutlet(this);
+    S::getMainComponent()->selectOutlet(this);
 }
 
 void OutletComponent::mouseEnter (const MouseEvent& e)
@@ -48,7 +50,7 @@ void OutletComponent::mouseEnter (const MouseEvent& e)
 
 void OutletComponent::mouseDoubleClick(const MouseEvent &event)
 {
-    S::getInstance().mainComponent->selectOutlet(this, true);
+    S::getMainComponent()->selectOutlet(this, true);
 }
 
 bool OutletComponent::addCable(Connection *cable)
@@ -90,21 +92,23 @@ void OutletComponent::paint (Graphics& g)
        You should replace everything in this method with your own
        drawing code..
     */
-    
-//    g.fillAll (isSink()? Colours::blue : Colours::green);   // clear the background
     g.fillAll (activeColor);   // clear the background
+
+    // Calulate new position
     Component *w = findParentComponentOfClass<DocumentWindow>();
     auto wr = w->getBoundsInParent();
     Point<int> ret(0,0);
     windowPosition.x = getScreenX() - wr.getX() + getWidth()/2;
     windowPosition.y = getScreenY() - wr.getY() + getHeight()/2;
+    
+    cout << "outlet pos: " << windowPosition.x << " " << windowPosition.y << endl;
+
 }
 
 void OutletComponent::resized()
 {
     // This method is where you should set the bounds of any child
     // components that your component contains..
-    cout << "outlet pos: " << windowPosition.x << " " << windowPosition.y << endl;
 }
 
 Point<int> OutletComponent::getWindowPos()
@@ -143,4 +147,13 @@ void OutletComponent::signalize(Colour c, bool ena)
         signalState = true;
         startTimerHz(BLINK_FREQ_HZ);
     }
+}
+
+Point<int> OutletComponent::getStrainReliefPos()
+{
+    // Add 'strain relief' offset
+    if (isSource())
+        return Point<int>(windowPosition.x - STRAIN_RELIEF_OFFSET, windowPosition.y);
+    else
+        return Point<int>(windowPosition.x + STRAIN_RELIEF_OFFSET, windowPosition.y);
 }

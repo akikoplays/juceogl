@@ -40,11 +40,11 @@ void OutletOptionsComponent::buttonClicked(Button *button)
 {
     if (button == &disconnectAllButton) {
         cout << "Disconnect all pressed" << endl;
-        S::getInstance().mainComponent->killAllCablesForOutlet(parent);
+        S::getMainComponent()->killAllCablesForOutlet(parent);
     } else if (button == &disconnectSingleButton) {
         cout << "Disconnect single pressed" << endl;
     }
-    S::getInstance().mainComponent->hideOptionsCallout();
+    S::getMainComponent()->hideOptionsCallout();
 }
 
 void OutletOptionsComponent::paint(Graphics &g)
@@ -83,10 +83,9 @@ void NodeOptionsComponent::buttonClicked(Button *button)
 {
     if (button == &deleteButton) {
         cout << "Delete Node pressed" << endl;
-        // TODO:
-        S::getInstance().mainComponent->removeAndDeleteNode(parent);
+        S::getMainComponent()->removeAndDeleteNode(parent);
     }
-    S::getInstance().mainComponent->hideOptionsCallout();
+    S::getMainComponent()->hideOptionsCallout();
 }
 
 void NodeOptionsComponent::paint(Graphics &g)
@@ -108,20 +107,25 @@ void NodeOptionsComponent::resized()
 MainContentComponent::MainContentComponent()
 : selectedOutletA(nullptr), selectedOutletB(nullptr), optionsCallout(nullptr), somethingIsBeingDraggedOver(false)
 {
-    setSize(1200, 800);
-    
 //    addAndMakeVisible(&ontop);
 //    ontop.setBounds(getLocalBounds());
 //    ontop.setInterceptsMouseClicks(false, false);
 
-    addAndMakeVisible(&librarian);
+    // Present layout component
+    layout = new LayoutComponent();
+    addAndMakeVisible(layout);
+    
+    // Present librarian toolbox
+    librarian = new LibrarianComponent();
+    addAndMakeVisible(librarian);
     
     // Sanity check
     S::getInstance().mainComponent = this;
-    assert(S::getInstance().mainComponent == this);
+    assert(S::getMainComponent() == this);
     
     // Main update timer used for animating elements on screen
     startTimerHz(50);
+    setSize(1200, 800);
 }
 
 MainContentComponent::~MainContentComponent()
@@ -329,7 +333,6 @@ void MainContentComponent::hideOptionsCallout()
 
 void MainContentComponent::mouseMove (const MouseEvent& e)
 {
-//    cout << "mouse moves " << e.getPosition().x << ", " << e.getPosition().y << endl;
 }
 
 
@@ -342,35 +345,6 @@ void MainContentComponent::paint (Graphics& g)
     g.setColour (Colours::white);
     g.drawText ("Hello World!", getLocalBounds(), Justification::centred, true);
     
-    // Update Librarian position
-    auto r = getLocalBounds();
-    auto lr = r.removeFromRight(200);
-    librarian.setBounds(lr);
-    
-    // Draw connections
-    auto it = connections.begin();
-    int i = 0;
-    while (it != connections.end()){
-        cout << "Painting connection " << i++ << endl;
-        Connection *conn = *it++;
-        assert(conn);
-        g.setColour(Colours::white);
-        OutletComponent *a = conn->a;
-        OutletComponent *b = conn->b;
-        
-        Point<int>apos = a->getWindowPos();
-        Point<int>bpos = b->getWindowPos();
-        
-        // Manhattan
-        float width = 1.5f;
-        if ((apos.x == bpos.x) || (apos.y == bpos.y))
-            g.drawLine(apos.x, apos.y, bpos.x, bpos.y, width);
-        else {
-            g.drawLine(apos.x, apos.y, bpos.x, apos.y, width);
-            g.drawLine(bpos.x, apos.y, bpos.x, bpos.y, width);
-        }
-    }
-
 }
 
 void MainContentComponent::resized()
@@ -378,59 +352,13 @@ void MainContentComponent::resized()
     // This is called when the MainContentComponent is resized.
     // If you add any child components, this is where you should
     // update their positions.
-}
+    
+    auto r = getLocalBounds();
 
-//==============================================================================
-// These methods implement the DragAndDropTarget interface, and allow our component
-// to accept drag-and-drop of objects from other Juce components..
-
-bool MainContentComponent::isInterestedInDragSource (const SourceDetails& /*dragSourceDetails*/)
-{
-    // normally you'd check the sourceDescription value to see if it's the
-    // sort of object that you're interested in before returning true, but for
-    // the demo, we'll say yes to anything..
-    return true;
-}
-
-void MainContentComponent::itemDragEnter (const SourceDetails& /*dragSourceDetails*/)
-{
-    somethingIsBeingDraggedOver = true;
-    repaint();
-}
-
-void MainContentComponent::itemDragMove (const SourceDetails& /*dragSourceDetails*/)
-{
-}
-
-void MainContentComponent::itemDragExit (const SourceDetails& /*dragSourceDetails*/)
-{
-    somethingIsBeingDraggedOver = false;
-    repaint();
-}
-
-void MainContentComponent::itemDropped (const SourceDetails& dragSourceDetails)
-{
-    if (somethingIsBeingDraggedOver) {
-        cout << "Items dropped: " << dragSourceDetails.description.toString() << endl;
-        cout << "drag state: " << somethingIsBeingDraggedOver << endl;
-        cout << "pos: " << dragSourceDetails.localPosition.x << ", " << dragSourceDetails.localPosition.y << endl;
-
-        // TODO:
-        // Create node based on what's dragged into the screen
-        ComponentDesc *desc = librarian.getComponentById(dragSourceDetails.description.toString());
-        if (desc == nullptr){
-            cout << "Error: unknown component dragged over" << endl;
-            return;
-        }
-        
-        NodeComponent *node = new NodeComponent(desc);
-        addAndMakeVisible(node);
-        nodes.add(node);
-        node->setBounds(dragSourceDetails.localPosition.x, dragSourceDetails.localPosition.y, 100, 100);
-
-    }
-    somethingIsBeingDraggedOver = false;
-    repaint();
+    // Update Layout and Librarian positions
+    auto lr = r.removeFromRight(200);
+    librarian->setBounds(lr);
+    layout->setBounds(r);
 }
 
 void MainContentComponent::timerCallback()
