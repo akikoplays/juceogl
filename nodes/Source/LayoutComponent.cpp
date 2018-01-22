@@ -16,6 +16,8 @@
 
 using namespace std;
 
+#define NODE_SIZE Point<int>(100, 100)
+
 //==============================================================================
 LayoutComponent::LayoutComponent()
 {
@@ -127,7 +129,10 @@ void LayoutComponent::itemDropped (const SourceDetails& dragSourceDetails)
         NodeComponent *node = new NodeComponent(desc);
         addAndMakeVisible(node);
         S::getInstance().mainComponent->addNode(node);
-        node->setBounds(dragSourceDetails.localPosition.x, dragSourceDetails.localPosition.y, 100, 100);
+        
+        Point<int> size = NODE_SIZE;
+        node->setBounds(dragSourceDetails.localPosition.x - size.x/2, dragSourceDetails.localPosition.y - size.y/2,
+                        size.x, size.y);
         
     }
     somethingIsBeingDraggedOver = false;

@@ -125,7 +125,7 @@ MainContentComponent::MainContentComponent()
     
     // Main update timer used for animating elements on screen
     startTimerHz(50);
-    setSize(1200, 800);
+    setSize(1000, 600);
 }
 
 MainContentComponent::~MainContentComponent()
@@ -331,11 +331,6 @@ void MainContentComponent::hideOptionsCallout()
     optionsCallout = nullptr;
 }
 
-void MainContentComponent::mouseMove (const MouseEvent& e)
-{
-}
-
-
 void MainContentComponent::paint (Graphics& g)
 {
     // (Our component is opaque, so we must completely fill the background with a solid colour)
@@ -356,7 +351,7 @@ void MainContentComponent::resized()
     auto r = getLocalBounds();
 
     // Update Layout and Librarian positions
-    auto lr = r.removeFromRight(200);
+    auto lr = r.removeFromRight(128);
     librarian->setBounds(lr);
     layout->setBounds(r);
 }

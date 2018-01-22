@@ -97,7 +97,6 @@ public:
 
     void paint (Graphics&) override;
     void resized() override;
-    void mouseMove (const MouseEvent& e) override;
     void timerCallback() override;
 
     // Selects the given outlet as A or B endpoint of future connection, opens options callout if options = true.
@@ -129,10 +128,12 @@ public:
     // Hide optionsCalloutBox, if there. If not - ignore.
     void hideOptionsCallout();
     // Add node to internal list.
-    void addNode(NodeComponent *node) {
+    void addNode(NodeComponent *node)
+    {
         nodes.add(node);
     };
-    LibrarianComponent *getLibrarian() {
+    LibrarianComponent *getLibrarian()
+    {
         return librarian;
     };
     

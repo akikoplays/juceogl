@@ -16,6 +16,8 @@
 
 using namespace std;
 
+#define OUTLET_SIZE Point<int>(15, 15)
+
 //==============================================================================
 NodeComponent::NodeComponent(ComponentDesc *_desc)
 {
@@ -56,9 +58,10 @@ void NodeComponent::paint (Graphics& g)
        You should replace everything in this method with your own
        drawing code..
     */
+    Point<int>outletSize = OUTLET_SIZE;
 
     auto r = getLocalBounds();
-    r.reduce(10,10);
+    r.reduce(outletSize.x, outletSize.y);
     g.setColour(getLookAndFeel().findColour (ResizableWindow::backgroundColourId));
     g.fillRect(r);
 
@@ -84,27 +87,27 @@ void NodeComponent::paint (Graphics& g)
     // TODO:
     // Dynamically painted outlets based on their descriptors
     
-    int h = 10, w = 10;
+    
     r = getLocalBounds();
     int numSrcs = 0;
     for (int i=0; i<outlets.size(); i++)
         numSrcs = desc->outlets[i].direction == OutletParamBlock::Direction::SOURCE ? numSrcs + 1 : numSrcs;
     int numSinks = outlets.size() - numSrcs;
-    int sinkstarty = r.getHeight()/2-h/2 - numSinks/2 * (h+2);
-    int stepy = h + 2;
-    int srcstarty = r.getHeight()/2-h/2 - numSrcs/2 * (h+2);
+    int sinkstarty = r.getHeight()/2-OUTLET_SIZE.y/2 - numSinks/2 * (OUTLET_SIZE.y+2);
+    int stepy = OUTLET_SIZE.y + 2;
+    int srcstarty = r.getHeight()/2-OUTLET_SIZE.y/2 - numSrcs/2 * (OUTLET_SIZE.y+2);
 
     for (int i=0; i<outlets.size(); i++) {
         Rectangle<int> src;
         int startx = 0;
         if (desc->outlets[i].direction == OutletParamBlock::Direction::SINK) {
-            startx = r.getWidth()-10;
-            src.setBounds(startx, sinkstarty, w, h);
+            startx = r.getWidth()-OUTLET_SIZE.x;
+            src.setBounds(startx, sinkstarty, OUTLET_SIZE.x, OUTLET_SIZE.y);
             outlets[i]->setBounds(src);
             sinkstarty += stepy;
         } else {
             startx = 0;
-            src.setBounds(startx, srcstarty, w, h);
+            src.setBounds(startx, srcstarty, OUTLET_SIZE.x, OUTLET_SIZE.y);
             outlets[i]->setBounds(src);
             srcstarty += stepy;
         }

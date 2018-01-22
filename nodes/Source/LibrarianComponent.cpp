@@ -13,6 +13,8 @@
 
 using namespace std;
 
+#define BUTTON_SIZE Point<int>(64, 64)
+
 //==============================================================================
 
 String LibrarianComponent::getAppFolder()
@@ -166,11 +168,11 @@ void LibrarianComponent::resized()
     // This method is where you should set the bounds of any child
     // components that your component contains..
     
-    int buttonHeight = 40;
+    Point<int>size = BUTTON_SIZE;
     auto r = getLocalBounds();
     for (int i=0; i<buttons.size(); i++) {
         TextButton *b = buttons[i];
-        auto p = r.removeFromTop(buttonHeight);
+        auto p = r.removeFromTop(size.y);
         b->setBounds(p);
         addAndMakeVisible(b);
     }
