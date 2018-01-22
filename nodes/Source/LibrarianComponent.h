@@ -23,6 +23,8 @@ struct OutletDesc
     OutletParamBlock::Direction direction;
     OutletParamBlock::Type type;
     int maxReceivers;
+    int rating;
+    int ratingRange[2];
 };
 
 struct ComponentDesc

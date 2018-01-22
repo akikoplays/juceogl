@@ -93,16 +93,16 @@ LibrarianComponent::LibrarianComponent()
                                 // Should strongly typed conversion be done here? hmm..
                                 // or just map all the values, and then convert else where.
                                 if (subprops.getName(i).toString() == "type") {
-//                                    odesc.type = subprops.getValueAt(i).toString();
                                     if (subprops.getValueAt(i).toString() == "bus")
                                         odesc.type = OutletParamBlock::Type::POWER_BUS;
+                                    else if (subprops.getValueAt(i).toString() == "dcbus")
+                                        odesc.type = OutletParamBlock::Type::POWER_DCBUS;
                                     else if (subprops.getValueAt(i).toString() == "binary")
                                         odesc.type = OutletParamBlock::Type::BINARY;
                                     else if (subprops.getValueAt(i).toString() == "comm")
                                         odesc.type = OutletParamBlock::Type::COMM;
                                 }
                                 else if (subprops.getName(i).toString() == "dir"){
-//                                    odesc.direction = subprops.getValueAt(i).toString();
                                     if (subprops.getValueAt(i).toString() == "in")
                                         odesc.direction = OutletParamBlock::Direction::SOURCE;
                                     else if (subprops.getValueAt(i).toString() == "out")
@@ -110,6 +110,22 @@ LibrarianComponent::LibrarianComponent()
                                 }
                                 else if (subprops.getName(i).toString() == "max-receivers")
                                     odesc.maxReceivers = subprops.getValueAt(i);
+                                else if (subprops.getName(i).toString() == "rating") {
+                                    var rating = subprops.getValueAt(i);
+                                    if (rating.isArray()) {
+                                        if (rating.size() != 2){
+                                            cout << "\t\t-- error: if rating is range, then it must have two values, ie [220,500]" << endl;
+                                            continue;
+                                        }
+                                        cout << "\t\t-- rating is range: " << rating[0].toString() << " to " << rating[1].toString();
+                                        odesc.ratingRange[0] = rating[0];
+                                        odesc.ratingRange[1] = rating[1];
+                                    } else {
+                                        cout << "\t\t-- rating is fixed value: " << rating.toString();
+                                        odesc.rating = rating;
+                                    }
+                                }
+
                             }
                             cdesc->outlets.add(odesc);
                         }

@@ -17,9 +17,10 @@ class Connection;
 class OutletParamBlock {
 public:
     enum Type {
-        POWER_BUS = 0,
-        BINARY,
-        COMM
+        POWER_BUS = 0,  // AC bus
+        POWER_DCBUS,    // DC bus
+        BINARY,         // 1/0 true/false binary switch
+        COMM            // can, uart, ...
     };
     
     enum Direction {

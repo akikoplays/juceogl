@@ -1,39 +1,100 @@
 {
   "mains1" : {
-      "name" : "220V Main Bus",
+      "name" : "220/500/600V Main Bus",
       "outlets" : 
         {
           "out 220" : 
             {
               "type" : "bus",
               "dir" : "out",
-              "max-receivers" : -1
+              "max-receivers" : -1,
+              "rating" : 220
             },
           "out 500" : 
             {
               "type" : "bus",
               "dir" : "out",
-              "max-receivers" : -1
+              "max-receivers" : -1,
+              "rating" : 500
             },
           "out 600" : 
             {
               "type" : "bus",
               "dir" : "out",
-              "max-receivers" : -1
+              "max-receivers" : -1,
+              "rating" : 600              
+            }
+        }
+  },
+  "mains2" : {
+      "name" : "500-700V Main Bus",
+      "outlets" : 
+        {
+          "out" : 
+            {
+              "type" : "bus",
+              "dir" : "out",
+              "max-receivers" : -1,
+              "rating" : [500, 700]
             }
         }
   },
   "motor1" : {
-      "name" : "220V Stepper",
+      "name" : "Stepper (220V)",
       "outlets" : 
         {
           "in 220" : 
             {
               "type" : "bus",
               "dir" : "in",
+              "rating" : 220
             }
         }
+  },
+  "motor2" : {
+      "name" : "Stepper (300-400V)",
+      "outlets" : 
+        {
+          "in 220" : 
+            {
+              "type" : "bus",
+              "dir" : "in",
+              "rating" : [300,400]
+            }
+        }
+  },
+  "motor3" : {
+      "name" : "DC motor (12V)",
+      "outlets" : 
+        {
+          "in 12" : 
+            {
+              "type" : "dcbus",
+              "dir" : "in",
+              "rating" : [12]
+            }
+        }
+  },
+  "transformer1" : {
+      "name" : "AC to DC (12V)",
+      "outlets" : 
+        {
+          "in 220" : 
+            {
+              "type" : "bus",
+              "dir" : "in",
+              "rating" : 220
+            },
+            "out 12" : 
+            {
+              "type" : "dcbus",
+              "dir" : "out",
+              "rating" : 12
+            }
+
+        }
   }
+
 
 }
 
