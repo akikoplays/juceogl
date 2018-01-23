@@ -138,3 +138,8 @@ void LayoutComponent::itemDropped (const SourceDetails& dragSourceDetails)
     somethingIsBeingDraggedOver = false;
     repaint();
 }
+
+void LayoutComponent::mouseDown(const MouseEvent& e)
+{
+    S::getMainComponent()->deselectAll();
+}

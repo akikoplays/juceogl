@@ -91,6 +91,12 @@ class MainContentComponent   :  public Component,
                                 private Timer
 {
 public:
+    
+    struct ValidationResult{
+        int code;
+        String message;
+    };
+    
     //==============================================================================
     MainContentComponent();
     ~MainContentComponent();
@@ -98,13 +104,16 @@ public:
     void paint (Graphics&) override;
     void resized() override;
     void timerCallback() override;
+    void mouseDown (const MouseEvent& e) override;
 
     // Selects the given outlet as A or B endpoint of future connection, opens options callout if options = true.
     void selectOutlet(OutletComponent *outlet, bool options = false);
     // Selects node, opens options callout if options = true.
     void selectNode(NodeComponent *node, bool options = false);
+    // Deselect nodes and outlets.
+    void deselectAll();
     // Validates connection following predefined set of rules, and returns true if it's ok.
-    bool validateConnection(OutletComponent *a, OutletComponent *b);
+    ValidationResult validateConnection(OutletComponent *a, OutletComponent *b);
     // Creates and registers new connection object.
     bool createConnection(OutletComponent *a, OutletComponent *b);
     // Return list of cables.

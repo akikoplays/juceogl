@@ -32,6 +32,7 @@ public:
     void mouseDoubleClick(const MouseEvent &event) override;
 
     const OwnedArray<OutletComponent>& getOutlets();
+    OutletDesc *getOutletDescByOutlet(OutletComponent *outlet);
 
 private:
     OwnedArray<OutletComponent> outlets;

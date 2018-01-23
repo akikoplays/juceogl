@@ -37,13 +37,22 @@ OutletComponent::~OutletComponent()
 {
 }
 
-void OutletComponent::mouseDown (const MouseEvent& e)
+void OutletComponent::mouseDown(const MouseEvent& e)
 {
     cout << "Mouse down on outlet" << endl;
-    S::getMainComponent()->selectOutlet(this);
+    mouseDownStartTime = Time::getCurrentTime().toMilliseconds();
 }
 
-void OutletComponent::mouseEnter (const MouseEvent& e)
+void OutletComponent::mouseUp(const MouseEvent& e)
+{
+    // Take it as single click
+    if (Time::getCurrentTime().toMilliseconds() - mouseDownStartTime > 100) {
+        cout << "Outlet selected." << endl;
+        S::getMainComponent()->selectOutlet(this);
+    }
+}
+
+void OutletComponent::mouseEnter(const MouseEvent& e)
 {
     cout << "Mouse entered outlet" << endl;
 }
@@ -101,7 +110,7 @@ void OutletComponent::paint (Graphics& g)
     windowPosition.x = getScreenX() - wr.getX() + getWidth()/2;
     windowPosition.y = getScreenY() - wr.getY() + getHeight()/2;
     
-    cout << "outlet pos: " << windowPosition.x << " " << windowPosition.y << endl;
+//    cout << "outlet pos: " << windowPosition.x << " " << windowPosition.y << endl;
 
 }
 
@@ -147,6 +156,7 @@ void OutletComponent::signalize(Colour c, bool ena)
         signalState = true;
         startTimerHz(BLINK_FREQ_HZ);
     }
+    repaint();
 }
 
 Point<int> OutletComponent::getStrainReliefPos()
@@ -156,4 +166,26 @@ Point<int> OutletComponent::getStrainReliefPos()
         return Point<int>(windowPosition.x - STRAIN_RELIEF_OFFSET, windowPosition.y);
     else
         return Point<int>(windowPosition.x + STRAIN_RELIEF_OFFSET, windowPosition.y);
+}
+
+bool OutletComponent::isRatingCompatible(OutletComponent *outlet2)
+{
+    NodeComponent *parent = dynamic_cast<NodeComponent*>(getParentComponent());
+    assert(parent);
+    OutletDesc *desc1 = parent->getOutletDescByOutlet(this);
+    assert(desc1);
+    
+    NodeComponent *parent2 = dynamic_cast<NodeComponent*>(outlet2->getParentComponent());
+    assert(parent2);
+    OutletDesc *desc2 = parent2->getOutletDescByOutlet(outlet2);
+    assert(desc2);
+
+    auto Min = std::max(desc1->rating[0], desc2->rating[0]);
+    auto Max = std::min(desc1->rating[1], desc2->rating[1]);
+    if (Min <= Max) {
+        // There's an intersection. represented by {Min Max}
+        cout << "Rating intersection OK: [" << Min << ", " << Max << "]" << std::endl;
+        return true;
+    }
+    return false;
 }

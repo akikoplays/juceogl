@@ -132,7 +132,7 @@ MainContentComponent::~MainContentComponent()
 {
 }
 
-bool MainContentComponent::validateConnection(OutletComponent *a, OutletComponent *b)
+MainContentComponent::ValidationResult MainContentComponent::validateConnection(OutletComponent *a, OutletComponent *b)
 {
     // Rules:
     // a) type must match
@@ -140,31 +140,36 @@ bool MainContentComponent::validateConnection(OutletComponent *a, OutletComponen
     cout << "Validate connection.. " << endl;
     if (a == b) {
         cout << "-- warning: a == b" << endl;
-        return false;
+        return {1, "Can't connect an outlet to itself."};
     }
     // Connection between same two outlets already exists?
     if (getConnectionByOutlets(a, b)) {
         cout << "-- warning: a/b cable already exists" << endl;
-        return false;
+        return {2, "The two outlets are already connected."};
     }
     if (a->getDirection() == b->getDirection()) {
         cout << "-- warning: a and b are of same direction" << endl;
-        return false;
+        return {3, "Connected outlets can't have same direction."};
     }
     if (a->getType() != b->getType()) {
         cout << "-- warning: a and b are not of same type" << endl;
-        return false;
+        return {4, "Connected outlets must be of the same type."};
     }
     // Does SOURCE outlet already has a connection?
     if (a->isSource() && getConnectionsLinkedToOutlet(a).size() > 0) {
         cout << "-- warning: a is SOURCE and already has a cable attached " << endl;
-        return false;
+        return {5, "Source outlet can have only ONE incoming connection."};
     }
     if (b->isSource() && getConnectionsLinkedToOutlet(b).size() > 0) {
         cout << "-- warning: b is SOURCE and already has a cable attached " << endl;
-        return false;
+        return {5, "Source outlet can have only ONE incoming connection."};
     }
-    return true;
+    // Is power rating acceptable?
+    if (!a->isRatingCompatible(b)) {
+        cout << "-- warning: incompatible rating" << endl;
+        return {6, "Power ratings are incompatible. Check the supply voltage."};
+    }
+    return {0, ""};
 }
 
 bool MainContentComponent::createConnection(OutletComponent *a, OutletComponent *b)
@@ -230,8 +235,15 @@ void MainContentComponent::selectOutlet(OutletComponent *outlet, bool options)
         selectedOutletB = outlet;
         
         // Validate connection
-        if (validateConnection(selectedOutletA, selectedOutletB)) {
+        MainContentComponent::ValidationResult result;
+        result = validateConnection(selectedOutletA, selectedOutletB);
+        if (result.code == 0) {
             createConnection(selectedOutletA, selectedOutletB);
+        } else {
+            AlertWindow::showMessageBoxAsync (AlertWindow::WarningIcon,
+                                              "Connection Warning",
+                                              result.message,
+                                              "OK");
         }
         
         // If connection successful, release selectedOutlets, and stop signaling on them
@@ -243,6 +255,23 @@ void MainContentComponent::selectOutlet(OutletComponent *outlet, bool options)
         
     // Force repaint
     repaint();
+}
+
+void MainContentComponent::deselectAll()
+{
+    cout << "Deselect all" << endl;
+    // Deselect outlets
+    if (selectedOutletA){
+        selectedOutletA->signalize(Colours::white, false);
+        selectedOutletA = nullptr;
+    }
+    if (selectedOutletB){
+        selectedOutletB->signalize(Colours::white, false);
+        selectedOutletB = nullptr;
+    }
+    
+    // Deselct nodes
+    // TODO
 }
 
 std::vector<Connection *> MainContentComponent::getConnectionsLinkedToOutlet(OutletComponent *outlet)
@@ -359,4 +388,8 @@ void MainContentComponent::resized()
 void MainContentComponent::timerCallback()
 {
     
+}
+
+void MainContentComponent::mouseDown (const MouseEvent& e)
+{
 }

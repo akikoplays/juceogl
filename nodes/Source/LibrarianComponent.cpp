@@ -80,8 +80,8 @@ LibrarianComponent::LibrarianComponent()
                             var child (subprops[id]);
                             jassert (! child.isVoid());
 
-                            OutletDesc odesc;
-                            odesc.name = subprops.getName(i).toString();
+                            OutletDesc *odesc = new OutletDesc();
+                            odesc->name = subprops.getName(i).toString();
 
                             // Parse outlet properties
                             NamedValueSet& subprops(child.getDynamicObject()->getProperties());
@@ -94,22 +94,22 @@ LibrarianComponent::LibrarianComponent()
                                 // or just map all the values, and then convert else where.
                                 if (subprops.getName(i).toString() == "type") {
                                     if (subprops.getValueAt(i).toString() == "bus")
-                                        odesc.type = OutletParamBlock::Type::POWER_BUS;
+                                        odesc->type = OutletParamBlock::Type::POWER_BUS;
                                     else if (subprops.getValueAt(i).toString() == "dcbus")
-                                        odesc.type = OutletParamBlock::Type::POWER_DCBUS;
+                                        odesc->type = OutletParamBlock::Type::POWER_DCBUS;
                                     else if (subprops.getValueAt(i).toString() == "binary")
-                                        odesc.type = OutletParamBlock::Type::BINARY;
+                                        odesc->type = OutletParamBlock::Type::BINARY;
                                     else if (subprops.getValueAt(i).toString() == "comm")
-                                        odesc.type = OutletParamBlock::Type::COMM;
+                                        odesc->type = OutletParamBlock::Type::COMM;
                                 }
                                 else if (subprops.getName(i).toString() == "dir"){
                                     if (subprops.getValueAt(i).toString() == "in")
-                                        odesc.direction = OutletParamBlock::Direction::SOURCE;
+                                        odesc->direction = OutletParamBlock::Direction::SOURCE;
                                     else if (subprops.getValueAt(i).toString() == "out")
-                                        odesc.direction = OutletParamBlock::Direction::SINK;
+                                        odesc->direction = OutletParamBlock::Direction::SINK;
                                 }
                                 else if (subprops.getName(i).toString() == "max-receivers")
-                                    odesc.maxReceivers = subprops.getValueAt(i);
+                                    odesc->maxReceivers = subprops.getValueAt(i);
                                 else if (subprops.getName(i).toString() == "rating") {
                                     var rating = subprops.getValueAt(i);
                                     if (rating.isArray()) {
@@ -118,11 +118,12 @@ LibrarianComponent::LibrarianComponent()
                                             continue;
                                         }
                                         cout << "\t\t-- rating is range: " << rating[0].toString() << " to " << rating[1].toString();
-                                        odesc.ratingRange[0] = rating[0];
-                                        odesc.ratingRange[1] = rating[1];
+                                        odesc->rating[0] = rating[0];
+                                        odesc->rating[1] = rating[1];
                                     } else {
                                         cout << "\t\t-- rating is fixed value: " << rating.toString();
-                                        odesc.rating = rating;
+                                        odesc->rating[0] = rating;
+                                        odesc->rating[1] = rating;
                                     }
                                 }
 
@@ -140,10 +141,10 @@ LibrarianComponent::LibrarianComponent()
     for (int i=0; i<components.size(); i++) {
         cout << i << ": " << components[i]->name << endl;
         for (int j=0; j<components[i]->outlets.size(); j++) {
-            cout << "\t" << j << ": " << components[i]->outlets[j].name << endl;
-            cout << "\t" << "-- type: " << components[i]->outlets[j].type << endl;
-            cout << "\t" << "-- dir: " << components[i]->outlets[j].direction << endl;
-            cout << "\t" << "-- max-receivers: " << components[i]->outlets[j].maxReceivers << endl;
+            cout << "\t" << j << ": " << components[i]->outlets[j]->name << endl;
+            cout << "\t" << "-- type: " << components[i]->outlets[j]->type << endl;
+            cout << "\t" << "-- dir: " << components[i]->outlets[j]->direction << endl;
+            cout << "\t" << "-- max-receivers: " << components[i]->outlets[j]->maxReceivers << endl;
         }
         addButton(components[i]);
     }
@@ -211,3 +212,4 @@ ComponentDesc *LibrarianComponent::getComponentById(const String cid)
     }
     return nullptr;
 }
+

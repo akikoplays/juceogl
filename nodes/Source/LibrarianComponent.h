@@ -17,21 +17,30 @@
 /*
 */
 
-struct OutletDesc
+class OutletDesc
 {
+public:
+    OutletDesc()
+    {
+        
+    }
+    ~OutletDesc()
+    {
+        std::cout << "Deconstructor for OutletDesc: " << name << std::endl;
+    }
+    
     String name;
     OutletParamBlock::Direction direction;
     OutletParamBlock::Type type;
     int maxReceivers;
-    int rating;
-    int ratingRange[2];
+    int rating[2]; // Rating is min, max. In case of fixed rating, min = max.
 };
 
 struct ComponentDesc
 {
     String cid;
     String name;
-    Array<OutletDesc> outlets;
+    OwnedArray<OutletDesc> outlets;
 };
 
 class LibrarianComponent    :   public Component,
@@ -67,6 +76,7 @@ public:
     String getAppFolder();
     void addButton(ComponentDesc *cdesc);
     ComponentDesc *getComponentById(const String cid);
+    OutletDesc *getOutletDescByOutlet(OutletComponent *outlet);
     
 private:
     Array<ComponentDesc *> components;

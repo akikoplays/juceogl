@@ -71,19 +71,19 @@
             {
               "type" : "dcbus",
               "dir" : "in",
-              "rating" : [12]
+              "rating" : 12
             }
         }
   },
   "transformer1" : {
-      "name" : "AC to DC (12V)",
+      "name" : "200-900 AC to DC (12V)",
       "outlets" : 
         {
           "in 220" : 
             {
               "type" : "bus",
               "dir" : "in",
-              "rating" : 220
+              "rating" : [200,900]
             },
             "out 12" : 
             {
@@ -93,8 +93,26 @@
             }
 
         }
-  }
+  },
+  "stepdown1" : {
+      "name" : "500-900V Stepdown to 400V",
+      "outlets" : 
+        {
+          "in 500-900" : 
+            {
+              "type" : "bus",
+              "dir" : "in",
+              "rating" : [500,900]
+            },
+            "out 400" : 
+            {
+              "type" : "bus",
+              "dir" : "out",
+              "rating" : 400
+            }
 
+        }
+  }
 
 }
 

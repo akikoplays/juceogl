@@ -26,6 +26,7 @@ public:
 
     void paint (Graphics&) override;
     void resized() override;
+    void mouseDown (const MouseEvent& e) override;
 
     bool isInterestedInDragSource (const SourceDetails& /*dragSourceDetails*/) override;
     void itemDragEnter (const SourceDetails& /*dragSourceDetails*/) override;

@@ -46,6 +46,7 @@ public:
     void paint (Graphics&) override;
     void resized() override;
     void mouseDown (const MouseEvent& e) override;
+    void mouseUp (const MouseEvent& e) override;
     void mouseEnter (const MouseEvent& e) override;
     void mouseDoubleClick(const MouseEvent &event) override;
     void timerCallback() override;
@@ -55,6 +56,9 @@ public:
     bool isSink() {return desc.direction == OutletParamBlock::Direction::SINK;};
     OutletParamBlock::Type getType() {return desc.type;};
     OutletParamBlock::Direction getDirection() {return desc.direction;};
+    // Checks if this outlet's power rating is compatible with the given outlet's rating. Outlets may be of fixed or ranged voltage levels,
+    // but it's only important that they overlap.
+    bool isRatingCompatible(OutletComponent *outlet2);
     bool addCable(Connection *cable);
     // Removes specific cable. Warning: doesn't deallocate it!
     bool removeCable(Connection *cable);
@@ -80,5 +84,7 @@ private:
     Colour baseColor;
     Colour activeColor;
     Point<int> windowPosition;
+    int64 mouseDownStartTime;
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OutletComponent)
 };

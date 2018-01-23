@@ -39,7 +39,7 @@ NodeComponent::NodeComponent(ComponentDesc *_desc)
     
     for (int i=0; i<desc->outlets.size(); i++) {
         // Note that pins have the same order as the desc->outlets[] array.
-        OutletComponent *pin = new OutletComponent(desc->outlets[i].type, desc->outlets[i].direction);
+        OutletComponent *pin = new OutletComponent(desc->outlets[i]->type, desc->outlets[i]->direction);
         addAndMakeVisible(pin);
         outlets.add(pin);
     }
@@ -91,7 +91,7 @@ void NodeComponent::paint (Graphics& g)
     r = getLocalBounds();
     int numSrcs = 0;
     for (int i=0; i<outlets.size(); i++)
-        numSrcs = desc->outlets[i].direction == OutletParamBlock::Direction::SOURCE ? numSrcs + 1 : numSrcs;
+        numSrcs = desc->outlets[i]->direction == OutletParamBlock::Direction::SOURCE ? numSrcs + 1 : numSrcs;
     int numSinks = outlets.size() - numSrcs;
     int sinkstarty = r.getHeight()/2-OUTLET_SIZE.y/2 - numSinks/2 * (OUTLET_SIZE.y+2);
     int stepy = OUTLET_SIZE.y + 2;
@@ -100,7 +100,7 @@ void NodeComponent::paint (Graphics& g)
     for (int i=0; i<outlets.size(); i++) {
         Rectangle<int> src;
         int startx = 0;
-        if (desc->outlets[i].direction == OutletParamBlock::Direction::SINK) {
+        if (desc->outlets[i]->direction == OutletParamBlock::Direction::SINK) {
             startx = r.getWidth()-OUTLET_SIZE.x;
             src.setBounds(startx, sinkstarty, OUTLET_SIZE.x, OUTLET_SIZE.y);
             outlets[i]->setBounds(src);
@@ -153,3 +153,11 @@ const OwnedArray<OutletComponent>& NodeComponent::getOutlets()
 {
     return outlets;
 };
+
+OutletDesc *NodeComponent::getOutletDescByOutlet(OutletComponent *outlet)
+{
+    int idx = outlets.indexOf(outlet);
+    assert(idx>=0);
+    // TODO check this warning.. returning reference to local temporary object
+    return desc->outlets[idx];
+}
