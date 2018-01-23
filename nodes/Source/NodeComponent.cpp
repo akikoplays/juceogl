@@ -69,24 +69,12 @@ void NodeComponent::paint (Graphics& g)
     g.drawRect (r, 1);   // draw an outline around the component
 
     g.setColour (Colours::white);
-    g.setFont (10.0f);
-    g.drawText (desc->name, getLocalBounds(),
-                Justification::centred, true);   // draw some placeholder text
-    
-//    // Sink
-//    r = getLocalBounds();
-//    Rectangle<int> sink;
-//    sink.setBounds(0, r.getHeight()/2-5, 10, 10);
-//    outlets[0]->setBounds(sink);
-//    // Src
-//    r = getLocalBounds();
-//    Rectangle<int> src;
-//    src.setBounds(r.getWidth()-10, r.getHeight()/2-5, 10, 10);
-//    outlets[1]->setBounds(src);
+    g.setFont (12.0f);
+//    g.drawText (desc->name, getLocalBounds(),
+//                Justification::centred, true);   // draw some placeholder text
     
     // TODO:
     // Dynamically painted outlets based on their descriptors
-    
     
     r = getLocalBounds();
     int numSrcs = 0;
@@ -112,6 +100,9 @@ void NodeComponent::paint (Graphics& g)
             srcstarty += stepy;
         }
     }
+    
+    g.drawFittedText(desc->name, outletSize.x-4, 0, getWidth()-outletSize.x-10, getHeight(), Justification::verticallyCentred | Justification::horizontallyCentred, 3, 1.0);
+
 }
 
 void NodeComponent::resized()
