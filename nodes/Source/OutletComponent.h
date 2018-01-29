@@ -84,7 +84,6 @@ private:
     Colour baseColor;
     Colour activeColor;
     Point<int> windowPosition;
-    int64 mouseDownStartTime;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OutletComponent)
 };

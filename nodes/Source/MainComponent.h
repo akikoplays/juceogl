@@ -112,6 +112,10 @@ public:
     void selectNode(NodeComponent *node, bool options = false);
     // Deselect nodes and outlets.
     void deselectAll();
+    // Get area of all selected nodes.
+    Rectangle<int> getAreaOfSelectedNodes();
+    // Move all selected nodes by delta value.
+    void moveSelectedNodes(NodeComponent *chief, Point<int> delta);
     // Validates connection following predefined set of rules, and returns true if it's ok.
     ValidationResult validateConnection(OutletComponent *a, OutletComponent *b);
     // Creates and registers new connection object.
@@ -154,6 +158,7 @@ private:
     ScopedPointer<LibrarianComponent> librarian;
     ScopedPointer<LayoutComponent> layout;
     OwnedArray<NodeComponent> nodes;
+    std::vector<NodeComponent*> selectedNodes;
     std::vector<Connection*> connections;
     bool somethingIsBeingDraggedOver;
 

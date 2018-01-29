@@ -40,26 +40,28 @@ OutletComponent::~OutletComponent()
 void OutletComponent::mouseDown(const MouseEvent& e)
 {
     cout << "Mouse down on outlet" << endl;
-    mouseDownStartTime = Time::getCurrentTime().toMilliseconds();
+    if (e.mods.isRightButtonDown()){
+        S::getMainComponent()->selectOutlet(this, true);
+    }
 }
 
 void OutletComponent::mouseUp(const MouseEvent& e)
 {
-    // Take it as single click
-    if (Time::getCurrentTime().toMilliseconds() - mouseDownStartTime > 100) {
-        cout << "Outlet selected." << endl;
-        S::getMainComponent()->selectOutlet(this);
-    }
+    // RMB? Ignore
+    if (e.mods.isRightButtonDown())
+        return;
+    
+    // Select outlet
+    cout << "Outlet selected." << endl;
+    S::getMainComponent()->selectOutlet(this);
 }
 
 void OutletComponent::mouseEnter(const MouseEvent& e)
 {
-    cout << "Mouse entered outlet" << endl;
 }
 
 void OutletComponent::mouseDoubleClick(const MouseEvent &event)
 {
-    S::getMainComponent()->selectOutlet(this, true);
 }
 
 bool OutletComponent::addCable(Connection *cable)

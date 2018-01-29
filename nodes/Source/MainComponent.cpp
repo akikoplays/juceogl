@@ -212,6 +212,7 @@ void MainContentComponent::selectNode(NodeComponent *node, bool options)
     }
     // TODO:
     // implement node selection logic
+    selectedNodes.push_back(node);
 }
 
 void MainContentComponent::selectOutlet(OutletComponent *outlet, bool options)
@@ -270,8 +271,56 @@ void MainContentComponent::deselectAll()
         selectedOutletB = nullptr;
     }
     
-    // Deselct nodes
+    // Deselect nodes
     // TODO
+    for (auto it=selectedNodes.begin(); it!=selectedNodes.end(); it++) {
+        NodeComponent *c = *it;
+        c->deselect();
+    }
+    selectedNodes.clear();
+}
+
+Rectangle<int> MainContentComponent::getAreaOfSelectedNodes()
+{
+    if (selectedNodes.size() == 0)
+        return Rectangle<int>(0, 0, 0, 0);
+    
+    Rectangle<int> a = selectedNodes[0]->getBounds();
+    
+    for (auto comp: selectedNodes)
+        if (comp)
+            a = a.getUnion(comp->getBounds());
+    
+    return a;
+}
+
+void MainContentComponent::moveSelectedNodes(NodeComponent* chief, Point<int> delta)
+{
+    for (auto c: selectedNodes) {
+        if (c == chief)
+            continue;
+        
+        // Constrain to limits
+        auto targetArea = getAreaOfSelectedNodes() + delta;
+        auto limit = chief->getParentComponent()->getBounds();
+        
+
+        if (targetArea.getX() < 0)
+            delta.x -= targetArea.getX();
+        
+        if (targetArea.getY() < 0)
+            delta.y -= targetArea.getY();
+        
+        if (targetArea.getBottom() > limit.getBottom())
+            delta.y -= targetArea.getBottom() - limit.getBottom();
+        
+        if (targetArea.getRight() > limit.getRight())
+            delta.x -= targetArea.getRight() - limit.getRight();
+        
+        Rectangle<int> bounds (c->getBounds());
+        bounds += delta;
+        c->setBounds(bounds);
+    }
 }
 
 std::vector<Connection *> MainContentComponent::getConnectionsLinkedToOutlet(OutletComponent *outlet)

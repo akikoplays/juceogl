@@ -33,12 +33,15 @@ public:
 
     const OwnedArray<OutletComponent>& getOutlets();
     OutletDesc *getOutletDescByOutlet(OutletComponent *outlet);
+    void select();
+    void deselect();
 
 private:
     OwnedArray<OutletComponent> outlets;
     ComponentDragger dragger;
     ComponentBoundsConstrainer constrainer;
     ComponentDesc *desc;
-    int64 mouseDownStartTime;
+    Point<int> mouseDownWithinTarget;
+    bool selected;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NodeComponent)
 };

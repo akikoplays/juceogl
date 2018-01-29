@@ -24,15 +24,8 @@ NodeComponent::NodeComponent(ComponentDesc *_desc)
     // In your constructor, you should add any child components, and
     // initialise any special settings that your component needs.
 
-//    OutletComponent *pin = new OutletComponent(OutletDesc::Type::POWER_BUS, OutletDesc::Direction::SOURCE);
-//    addAndMakeVisible(pin);
-//    outlets.add(pin);
-//
-//    pin = new OutletComponent(OutletDesc::Type::POWER_BUS, OutletDesc::Direction::SINK);
-//    addAndMakeVisible(pin);
-//    outlets.add(pin);
-
     desc = _desc;
+    selected = false;
     
     cout << "Creating node instance for: " << desc->name << endl;
     setName(desc->name);
@@ -65,17 +58,10 @@ void NodeComponent::paint (Graphics& g)
     g.setColour(getLookAndFeel().findColour (ResizableWindow::backgroundColourId));
     g.fillRect(r);
 
-    g.setColour (Colours::grey);
+    g.setColour (selected ? Colours::white : Colours::grey);
     g.drawRect (r, 1);   // draw an outline around the component
 
-    g.setColour (Colours::white);
-    g.setFont (12.0f);
-//    g.drawText (desc->name, getLocalBounds(),
-//                Justification::centred, true);   // draw some placeholder text
-    
-    // TODO:
     // Dynamically painted outlets based on their descriptors
-    
     r = getLocalBounds();
     int numSrcs = 0;
     for (int i=0; i<outlets.size(); i++)
@@ -101,6 +87,8 @@ void NodeComponent::paint (Graphics& g)
         }
     }
     
+    g.setColour (Colours::white);
+    g.setFont (12.0f);
     g.drawFittedText(desc->name, outletSize.x-4, 0, getWidth()-outletSize.x-10, getHeight(), Justification::verticallyCentred | Justification::horizontallyCentred, 3, 1.0);
 
 }
@@ -115,17 +103,25 @@ void NodeComponent::resized()
 
 void NodeComponent::mouseDown (const MouseEvent& e)
 {
+    // Node options are shown on RMB
+    if (e.mods.isRightButtonDown()) {
+        S::getInstance().getMainComponent()->selectNode(this, true);
+        return;
+    }
     // Prepares our dragger to drag this Component
+    mouseDownWithinTarget = e.getEventRelativeTo(this).getMouseDownPosition();
     dragger.startDraggingComponent (this, e);
-    mouseDownStartTime = Time::getCurrentTime().toMilliseconds();
 }
 
 void NodeComponent::mouseUp (const MouseEvent& e)
 {
-    // Take it as single click
-    if (Time::getCurrentTime().toMilliseconds() - mouseDownStartTime < 180) {
-        cout << "Selected." << endl;
-    }
+    // RMB? ignore
+    if (e.mods.isRightButtonDown())
+        return;
+    
+    // Select node
+    select();
+    S::getInstance().getMainComponent()->selectNode(this);
 }
 
 void NodeComponent::mouseDrag (const MouseEvent& e)
@@ -133,11 +129,22 @@ void NodeComponent::mouseDrag (const MouseEvent& e)
     // Moves this Component according to the mouse drag event and applies our constraints to it
     dragger.dragComponent (this, e, &constrainer);
     S::getMainComponent()->repaint();
+    
+    // TODO
+    // logic for multi dragging
+    
+    // Tiny movements don't start a drag
+    const int minimumMovementToStartDrag = 10;
+    if (e.getDistanceFromDragStart() < minimumMovementToStartDrag)
+        return;
+    
+    Point<int> delta = e.getEventRelativeTo(this).getPosition() - mouseDownWithinTarget;
+    cout << "delta drag: " << delta.x << ", " << delta.y << endl;
+    S::getInstance().getMainComponent()->moveSelectedNodes(this, delta);
 }
 
 void NodeComponent::mouseDoubleClick(const MouseEvent &event)
 {
-    S::getMainComponent()->selectNode(this, true);
 }
 
 const OwnedArray<OutletComponent>& NodeComponent::getOutlets()
@@ -151,4 +158,19 @@ OutletDesc *NodeComponent::getOutletDescByOutlet(OutletComponent *outlet)
     assert(idx>=0);
     // TODO check this warning.. returning reference to local temporary object
     return desc->outlets[idx];
+}
+
+
+void NodeComponent::select()
+{
+    cout << "Node selected." << endl;
+    selected = true;
+    repaint();
+}
+
+void NodeComponent::deselect()
+{
+    cout << "Node deselected." << endl;
+    selected = false;
+    repaint();
 }
