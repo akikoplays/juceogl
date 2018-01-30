@@ -77,6 +77,7 @@ public:
 private:
     NodeComponent *parent;
     TextButton deleteButton;
+    TextButton deleteSelectedButton;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(NodeOptionsComponent)
 };
 
@@ -126,6 +127,8 @@ public:
     bool removeAndDeleteConnection(Connection *cable);
     // Remove and delete specific Node.
     void removeAndDeleteNode(NodeComponent *node);
+    // Remove and delete selected nodes.
+    void removeAndDeleteSelectedNodes();
     // Popup callout with outlet options.
     void showOutletOptions(OutletComponent *outlet);
     // Popup callout with node options.
@@ -149,9 +152,13 @@ public:
     {
         return librarian;
     };
+    Viewport &getViewport()
+    {
+        return viewport;
+    }
     
 private:
-//    OntopComponent ontop;
+    Viewport viewport;
     CallOutBox *optionsCallout;
     OutletComponent *selectedOutletA;
     OutletComponent *selectedOutletB;

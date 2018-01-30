@@ -18,7 +18,7 @@ using namespace std;
 #define STRAIN_RELIEF_OFFSET 20 // Offset in pixels
 
 //==============================================================================
-OutletComponent::OutletComponent(OutletParamBlock::Type type, OutletParamBlock::Direction direction)
+OutletComponent::OutletComponent(NodeComponent* parent, OutletParamBlock::Type type, OutletParamBlock::Direction direction)
 {
     // In your constructor, you should add any child components, and
     // initialise any special settings that your component needs.
@@ -31,6 +31,8 @@ OutletComponent::OutletComponent(OutletParamBlock::Type type, OutletParamBlock::
     else
         baseColor = Colours::blue;
     activeColor = baseColor;
+    node = parent;
+    assert(node);
 }
 
 OutletComponent::~OutletComponent()
@@ -106,11 +108,11 @@ void OutletComponent::paint (Graphics& g)
     g.fillAll (activeColor);   // clear the background
 
     // Calulate new position
-    Component *w = findParentComponentOfClass<DocumentWindow>();
-    auto wr = w->getBoundsInParent();
-    Point<int> ret(0,0);
-    windowPosition.x = getScreenX() - wr.getX() + getWidth()/2;
-    windowPosition.y = getScreenY() - wr.getY() + getHeight()/2;
+//    Component *w = findParentComponentOfClass<DocumentWindow>();
+//    auto wr = w->getBoundsInParent();
+//    Point<int> ret(0,0);
+//    windowPosition.x = getScreenX() - wr.getX() + getWidth()/2;
+//    windowPosition.y = getScreenY() - wr.getY() + getHeight()/2;
     
 //    cout << "outlet pos: " << windowPosition.x << " " << windowPosition.y << endl;
 
@@ -124,7 +126,14 @@ void OutletComponent::resized()
 
 Point<int> OutletComponent::getWindowPos()
 {
-    return windowPosition;
+    // TODO
+    // new way of proper relative coords fetch
+    auto r = node->getBoundsInParent();
+    auto r2 = getBoundsInParent();
+    
+    return Point<int>(r.getX() + r2.getX(), r.getY() + r2.getY());
+    
+//    return windowPosition;
     
     // If previous doesn't work, this will for sure.
 //    auto r = getBoundsInParent();
@@ -165,9 +174,9 @@ Point<int> OutletComponent::getStrainReliefPos()
 {
     // Add 'strain relief' offset
     if (isSource())
-        return Point<int>(windowPosition.x - STRAIN_RELIEF_OFFSET, windowPosition.y);
+        return getWindowPos() - Point<int>(STRAIN_RELIEF_OFFSET, 0);
     else
-        return Point<int>(windowPosition.x + STRAIN_RELIEF_OFFSET, windowPosition.y);
+        return getWindowPos() + Point<int>(STRAIN_RELIEF_OFFSET, 0);
 }
 
 bool OutletComponent::isRatingCompatible(OutletComponent *outlet2)
@@ -190,4 +199,9 @@ bool OutletComponent::isRatingCompatible(OutletComponent *outlet2)
         return true;
     }
     return false;
+}
+
+NodeComponent *OutletComponent::getNode()
+{
+    return node;
 }

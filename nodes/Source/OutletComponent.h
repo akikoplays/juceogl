@@ -13,6 +13,7 @@
 #include "../JuceLibraryCode/JuceHeader.h"
 
 class Connection;
+class NodeComponent;
 
 class OutletParamBlock {
 public:
@@ -40,7 +41,7 @@ class OutletComponent    :  public Component,
 {
 public:
     
-    OutletComponent(OutletParamBlock::Type type, OutletParamBlock::Direction direction);
+    OutletComponent(NodeComponent *parent, OutletParamBlock::Type type, OutletParamBlock::Direction direction);
     ~OutletComponent();
 
     void paint (Graphics&) override;
@@ -73,8 +74,12 @@ public:
     void signalize(Colour c, bool ena);
     // Return the offset from outlet to first cable twist.
     Point<int> getStrainReliefPos();
+    // Return parent node.
+    NodeComponent *getNode();
     
 private:
+    // Parent node component containing this outlet.
+    NodeComponent *node;
     // Each connection established with the outlet is added to this vector.
     std::vector<Connection *> cables;
     OutletParamBlock desc;

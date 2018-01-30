@@ -41,6 +41,9 @@ void LayoutComponent::paint (Graphics& g)
 
     g.fillAll (Colours::black);   // clear the background
     
+    // TODO
+    // test absolute coords in Layout component when operating within viewport
+    
     // Draw connections
     std::vector<Connection*> connections = S::getInstance().mainComponent->getConnections();
     auto it = connections.begin();
@@ -59,6 +62,7 @@ void LayoutComponent::paint (Graphics& g)
         Point<int>bpos = b->getWindowPos();
         
         // Draw strain reliefs
+        // TODO optimize this!!
         g.drawLine(apos.x, apos.y, a->getStrainReliefPos().x, a->getStrainReliefPos().y);
         g.drawLine(bpos.x, bpos.y, b->getStrainReliefPos().x,  b->getStrainReliefPos().y);
         

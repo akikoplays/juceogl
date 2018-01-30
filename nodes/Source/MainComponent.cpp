@@ -67,8 +67,11 @@ NodeOptionsComponent::NodeOptionsComponent(NodeComponent *_parent)
 {
     setName("NodeOptions");
     addAndMakeVisible(deleteButton);
+    addAndMakeVisible(deleteSelectedButton);
     deleteButton.setButtonText("Delete Node");
     deleteButton.addListener(this);
+    deleteSelectedButton.setButtonText("Delete Selected Nodes");
+    deleteSelectedButton.addListener(this);
     setAlpha(0.5f);
     parent = _parent;
 }
@@ -84,6 +87,9 @@ void NodeOptionsComponent::buttonClicked(Button *button)
     if (button == &deleteButton) {
         cout << "Delete Node pressed" << endl;
         S::getMainComponent()->removeAndDeleteNode(parent);
+    } else if (button == &deleteSelectedButton) {
+        cout << "Delete Selected Nodes pressed" << endl;
+        S::getMainComponent()->removeAndDeleteSelectedNodes();
     }
     S::getMainComponent()->hideOptionsCallout();
 }
@@ -98,7 +104,8 @@ void NodeOptionsComponent::resized()
     Rectangle<int> area(getLocalBounds());
     Rectangle<int> left (area.removeFromLeft(100));
     deleteButton.setBounds(left);
-    
+    left = area.removeFromLeft(100);
+    deleteSelectedButton.setBounds(left);
 }
 
 //==============================================================================
@@ -107,13 +114,13 @@ void NodeOptionsComponent::resized()
 MainContentComponent::MainContentComponent()
 : selectedOutletA(nullptr), selectedOutletB(nullptr), optionsCallout(nullptr), somethingIsBeingDraggedOver(false)
 {
-//    addAndMakeVisible(&ontop);
-//    ontop.setBounds(getLocalBounds());
-//    ontop.setInterceptsMouseClicks(false, false);
-
     // Present layout component
+    
     layout = new LayoutComponent();
-    addAndMakeVisible(layout);
+//    addAndMakeVisible(layout);
+    viewport.setViewedComponent(layout, false);
+    addAndMakeVisible(viewport);
+
     
     // Present librarian toolbox
     librarian = new LibrarianComponent();
@@ -391,6 +398,13 @@ void MainContentComponent::removeAndDeleteNode(NodeComponent *node)
     }
 }
 
+void MainContentComponent::removeAndDeleteSelectedNodes()
+{
+    for (auto node: selectedNodes) {
+        removeAndDeleteNode(node);
+    }
+}
+
 Connection *MainContentComponent::getConnectionByOutlets(OutletComponent *a, OutletComponent *b)
 {
     for (auto it = connections.begin(); it != connections.end(); it++) {
@@ -431,7 +445,10 @@ void MainContentComponent::resized()
     // Update Layout and Librarian positions
     auto lr = r.removeFromRight(128);
     librarian->setBounds(lr);
-    layout->setBounds(r);
+//    layout->setBounds(r);
+    viewport.setBounds(r);
+    // TODO provisionally lets set this to some insane size
+    layout->setBounds(0,0,2048,2048);
 }
 
 void MainContentComponent::timerCallback()

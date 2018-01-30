@@ -32,7 +32,9 @@ NodeComponent::NodeComponent(ComponentDesc *_desc)
     
     for (int i=0; i<desc->outlets.size(); i++) {
         // Note that pins have the same order as the desc->outlets[] array.
-        OutletComponent *pin = new OutletComponent(desc->outlets[i]->type, desc->outlets[i]->direction);
+        OutletComponent *pin = new OutletComponent(this,
+                                                   desc->outlets[i]->type,
+                                                   desc->outlets[i]->direction);
         addAndMakeVisible(pin);
         outlets.add(pin);
     }
@@ -108,6 +110,14 @@ void NodeComponent::mouseDown (const MouseEvent& e)
         S::getInstance().getMainComponent()->selectNode(this, true);
         return;
     }
+    
+    // Select node
+    if (!e.mods.isShiftDown()) {
+        S::getMainComponent()->deselectAll();
+    }
+    select();
+    S::getInstance().getMainComponent()->selectNode(this);
+
     // Prepares our dragger to drag this Component
     mouseDownWithinTarget = e.getEventRelativeTo(this).getMouseDownPosition();
     dragger.startDraggingComponent (this, e);
@@ -118,10 +128,6 @@ void NodeComponent::mouseUp (const MouseEvent& e)
     // RMB? ignore
     if (e.mods.isRightButtonDown())
         return;
-    
-    // Select node
-    select();
-    S::getInstance().getMainComponent()->selectNode(this);
 }
 
 void NodeComponent::mouseDrag (const MouseEvent& e)
@@ -139,8 +145,11 @@ void NodeComponent::mouseDrag (const MouseEvent& e)
         return;
     
     Point<int> delta = e.getEventRelativeTo(this).getPosition() - mouseDownWithinTarget;
-    cout << "delta drag: " << delta.x << ", " << delta.y << endl;
-    S::getInstance().getMainComponent()->moveSelectedNodes(this, delta);
+    //cout << "delta drag: " << delta.x << ", " << delta.y << endl;
+    S::getMainComponent()->moveSelectedNodes(this, delta);
+    
+    MouseEvent re (e.getEventRelativeTo(S::getMainComponent()));
+    S::getMainComponent()->getViewport().autoScroll(re.x, re.y, 10,8);
 }
 
 void NodeComponent::mouseDoubleClick(const MouseEvent &event)
