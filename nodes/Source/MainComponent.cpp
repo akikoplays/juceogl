@@ -145,10 +145,11 @@ MainContentComponent::~MainContentComponent()
     ValueTree layoutTree = ValueTree("layout");
     ValueTree nodesTree = ValueTree("nodes");
     for (auto node: nodes){
-        ValueTree child = ValueTree("node");
-        child.setProperty("uuid", "UUIDSTRING", nullptr);
-        child.setProperty("librarian-id", "Librarian ID string", nullptr);
-        child.setProperty("name", node->getName(), nullptr);
+//        ValueTree child = ValueTree("node");
+//        child.setProperty("uuid", "UUIDSTRING", nullptr);
+//        child.setProperty("librarian-id", "Librarian ID string", nullptr);
+//        child.setProperty("name", node->getName(), nullptr);
+        ValueTree child = node->serialize();
         nodesTree.addChild(child, -1, nullptr);
     }
     layoutTree.addChild(nodesTree, 0, nullptr);

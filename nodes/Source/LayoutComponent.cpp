@@ -130,7 +130,7 @@ void LayoutComponent::itemDropped (const SourceDetails& dragSourceDetails)
             return;
         }
         
-        NodeComponent *node = new NodeComponent(desc);
+        NodeComponent *node = new NodeComponent(desc, Uuid());
         addAndMakeVisible(node);
         S::getInstance().mainComponent->addNode(node);
         

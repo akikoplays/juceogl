@@ -19,13 +19,34 @@ using namespace std;
 #define OUTLET_SIZE Point<int>(15, 15)
 
 //==============================================================================
-NodeComponent::NodeComponent(ComponentDesc *_desc)
+void SnapConstraint::applyBoundsToComponent (Component &component, Rectangle<int> bounds)
+{
+    // Original code:
+//    component.setBounds (bounds);
+    // Snap to grid code:
+    int grid = 20;
+    int x = bounds.getX() / grid * grid;
+    int y = bounds.getY() / grid * grid;
+    bounds.setX(x);
+    bounds.setY(y);
+    component.setBounds(bounds);
+}
+
+
+//==============================================================================
+NodeComponent::NodeComponent(ComponentDesc *_desc, Uuid _uuid)
 {
     // In your constructor, you should add any child components, and
     // initialise any special settings that your component needs.
 
     desc = _desc;
     selected = false;
+    
+    // When node is loaded from layout file, Uuid is provided, otherwise it is calculated.
+    if (_uuid.isNull())
+        uuid = Uuid();
+    else
+        uuid = _uuid;
     
     cout << "Creating node instance for: " << desc->name << endl;
     setName(desc->name);
@@ -135,12 +156,15 @@ void NodeComponent::mouseDrag (const MouseEvent& e)
     // Moves this Component according to the mouse drag event and applies our constraints to it
     dragger.dragComponent (this, e, &constrainer);
     S::getMainComponent()->repaint();
+
+    // TODO
+    // fix multi drag when snapping on! constrainer is snapgridconstrainer, so the movement is quantized
     
     // TODO
     // logic for multi dragging
     
     // Tiny movements don't start a drag
-    const int minimumMovementToStartDrag = 10;
+    const int minimumMovementToStartDrag = 20;
     if (e.getDistanceFromDragStart() < minimumMovementToStartDrag)
         return;
     
@@ -183,3 +207,13 @@ void NodeComponent::deselect()
     selected = false;
     repaint();
 }
+
+ValueTree NodeComponent::serialize()
+{
+    ValueTree child = ValueTree("node");
+    child.setProperty("uuid", uuid.toString(), nullptr);
+    child.setProperty("librarian-id", this->desc->cid, nullptr);
+    child.setProperty("name", getName(), nullptr);
+    return child;
+}
+

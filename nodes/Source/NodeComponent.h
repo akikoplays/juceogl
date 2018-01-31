@@ -15,13 +15,23 @@
 class ComponentDesc;
 
 //==============================================================================
+/* This is my snap to grid constraint.
+ */
+class SnapConstraint : public ComponentBoundsConstrainer
+{
+public:
+    void applyBoundsToComponent (Component &, Rectangle<int> bounds) override;
+};
+
+
+//==============================================================================
 /*
 */
 class NodeComponent    : public Component
 {
 public:
     // Create node according to the descriptor received from LibrarianComponent via drag and drop.
-    NodeComponent(ComponentDesc *_desc);
+    NodeComponent(ComponentDesc *_desc, Uuid _uuid);
     ~NodeComponent();
 
     void paint (Graphics&) override;
@@ -35,11 +45,14 @@ public:
     OutletDesc *getOutletDescByOutlet(OutletComponent *outlet);
     void select();
     void deselect();
+    ValueTree serialize();
 
 private:
     OwnedArray<OutletComponent> outlets;
     ComponentDragger dragger;
-    ComponentBoundsConstrainer constrainer;
+//    ComponentBoundsConstrainer constrainer;
+    SnapConstraint constrainer;
+    Uuid uuid;
     ComponentDesc *desc;
     Point<int> mouseDownWithinTarget;
     bool selected;
