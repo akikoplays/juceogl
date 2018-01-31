@@ -13,6 +13,12 @@
 using namespace std;
 class MainContentComponent;
 
+class SnapConstraint : public ComponentBoundsConstrainer
+{
+public:
+    void applyBoundsToComponent (Component &, Rectangle<int> bounds) override;
+};
+
 class NodeComponent : public Component
 {
 public:
@@ -43,21 +49,16 @@ public:
         // update their positions.
     }
     
-    void mouseDown (const MouseEvent& e)
-    {
-        dragger.startDraggingComponent (this, e);
-    }
-    
-    void mouseUp (const MouseEvent& e)
-    {
-        
-    }
-    
-    void mouseDrag (const MouseEvent& e) override;
+    void mouseDown (const MouseEvent& e) override;
+    void mouseUp (const MouseEvent& e) override;
+    void mouseDrag(const juce::MouseEvent &e) override;
 
 private:
     ComponentDragger dragger;
-    ComponentBoundsConstrainer constrainer;
+
+    // TODO my snap to grid movement constrainer
+//    ComponentBoundsConstrainer constrainer;
+    SnapConstraint constrainer;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NodeComponent)
 };
