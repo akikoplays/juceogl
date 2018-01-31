@@ -73,7 +73,7 @@ public:
     void paint (Graphics&) override;
     void resized() override;
 
-    String getAppFolder();
+    static String getAppFolder();
     void addButton(ComponentDesc *cdesc);
     ComponentDesc *getComponentById(const String cid);
     OutletDesc *getOutletDescByOutlet(OutletComponent *outlet);

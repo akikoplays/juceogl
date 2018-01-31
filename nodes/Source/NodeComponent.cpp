@@ -172,8 +172,6 @@ OutletDesc *NodeComponent::getOutletDescByOutlet(OutletComponent *outlet)
 
 void NodeComponent::select()
 {
-//    if (selected)
-//        return;
     cout << "Node selected." << endl;
     selected = true;
     repaint();
@@ -181,8 +179,6 @@ void NodeComponent::select()
 
 void NodeComponent::deselect()
 {
-//    if (!selected)
-//        return;
     cout << "Node deselected." << endl;
     selected = false;
     repaint();

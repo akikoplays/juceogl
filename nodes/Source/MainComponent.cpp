@@ -113,7 +113,7 @@ void NodeOptionsComponent::resized()
 #pragma mark MainContentComponent
 
 MainContentComponent::MainContentComponent()
-: selectedOutletA(nullptr), selectedOutletB(nullptr), optionsCallout(nullptr), somethingIsBeingDraggedOver(false)
+: optionsCallout(nullptr), selectedOutletA(nullptr), selectedOutletB(nullptr), somethingIsBeingDraggedOver(false)
 {
     // Present layout component
     
@@ -138,6 +138,23 @@ MainContentComponent::MainContentComponent()
 
 MainContentComponent::~MainContentComponent()
 {
+    // TODO
+    // data serialization test
+    String appFolder = LibrarianComponent::getAppFolder();
+    String xmlFileName = appFolder + "layout.xml";
+    ValueTree layoutTree = ValueTree("layout");
+    ValueTree nodesTree = ValueTree("nodes");
+    for (auto node: nodes){
+        ValueTree child = ValueTree("node");
+        child.setProperty("uuid", "UUIDSTRING", nullptr);
+        child.setProperty("librarian-id", "Librarian ID string", nullptr);
+        child.setProperty("name", node->getName(), nullptr);
+        nodesTree.addChild(child, -1, nullptr);
+    }
+    layoutTree.addChild(nodesTree, 0, nullptr);
+
+    ScopedPointer<XmlElement> xml = layoutTree.createXml();
+    xml->writeToFile(xmlFileName, String::empty);
 }
 
 MainContentComponent::ValidationResult MainContentComponent::validateConnection(OutletComponent *a, OutletComponent *b)

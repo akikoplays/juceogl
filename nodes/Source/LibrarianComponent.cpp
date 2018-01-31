@@ -31,7 +31,7 @@ LibrarianComponent::LibrarianComponent()
 
     // Load library from json file
     String jsonStr;
-    String path = getAppFolder() + "mainlib.json";
+    String path = LibrarianComponent::getAppFolder() + "mainlib.json";
     File file(path);
     if (!file.exists()) {
         cout << "-- can't open main library" << endl;
