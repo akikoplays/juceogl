@@ -87,6 +87,7 @@ void NodeOptionsComponent::buttonClicked(Button *button)
     if (button == &deleteButton) {
         cout << "Delete Node pressed" << endl;
         S::getMainComponent()->removeAndDeleteNode(parent);
+        
     } else if (button == &deleteSelectedButton) {
         cout << "Delete Selected Nodes pressed" << endl;
         S::getMainComponent()->removeAndDeleteSelectedNodes();
@@ -303,6 +304,10 @@ Rectangle<int> MainContentComponent::getAreaOfSelectedNodes()
 
 void MainContentComponent::moveSelectedNodes(NodeComponent* chief, Point<int> delta)
 {
+    // TODO
+    // Multi select drag is disabled becuase it's too damn buggy.
+    
+    return;
     for (auto c: selectedNodes) {
         if (c == chief)
             continue;
@@ -394,7 +399,6 @@ void MainContentComponent::removeAndDeleteNode(NodeComponent *node)
         killAllCablesForNode(node);
         // note that remove() will call object's destructor.
         nodes.remove(i);
-
     }
 }
 
@@ -403,6 +407,10 @@ void MainContentComponent::removeAndDeleteSelectedNodes()
     for (auto node: selectedNodes) {
         removeAndDeleteNode(node);
     }
+    // If you call deselectAll at this point, it may very likely crash
+    // because it will try to call methods on destructed objects.
+    // So just empty the selection queue.
+    selectedNodes.clear();
 }
 
 Connection *MainContentComponent::getConnectionByOutlets(OutletComponent *a, OutletComponent *b)
