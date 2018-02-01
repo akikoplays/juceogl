@@ -75,8 +75,8 @@ public:
 
     static String getAppFolder();
     void addButton(ComponentDesc *cdesc);
+    // Return component descriptor by the librarian ID (component ID as it is stored in the library file).
     ComponentDesc *getComponentById(const String cid);
-    OutletDesc *getOutletDescByOutlet(OutletComponent *outlet);
     
 private:
     Array<ComponentDesc *> components;

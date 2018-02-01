@@ -140,37 +140,9 @@ MainContentComponent::MainContentComponent()
 
 MainContentComponent::~MainContentComponent()
 {
-    // TODO
-    // data serialization test
-    String appFolder = LibrarianComponent::getAppFolder();
-    String xmlFileName = appFolder + "layout.xml";
-    ValueTree layoutTree = ValueTree("layout");
-    
-    // Serialize all nodes
-    ValueTree nodesTree = ValueTree("nodes");
-    for (auto node: nodes){
-        ValueTree child = node->serialize();
-        nodesTree.addChild(child, -1, nullptr);
-    }
-    layoutTree.addChild(nodesTree, 0, nullptr);
-
-    // Serialize cables
-    ValueTree cablesTree = ValueTree("cables");
-    for (auto cable: connections)  {
-        ValueTree child = cable->serialize();
-        cablesTree.addChild(child, -1, nullptr);
-    }
-    layoutTree.addChild(cablesTree, 0, nullptr);
-
-    ScopedPointer<XmlElement> xml = layoutTree.createXml();
-    xml->writeToFile(xmlFileName, String::empty);
-    
-    // Delete all cables
-    for (auto cable: connections) {
-        delete cable;
-    }
-    connections.clear();
+    clearLayout();
 }
+
 
 MainContentComponent::ValidationResult MainContentComponent::validateConnection(OutletComponent *a, OutletComponent *b)
 {
@@ -503,4 +475,77 @@ void MainContentComponent::timerCallback()
 
 void MainContentComponent::mouseDown (const MouseEvent& e)
 {
+}
+
+bool MainContentComponent::saveLayoutToFile(String xmlFileName)
+{
+    // TODO
+    // data serialization test
+    ValueTree layoutTree = ValueTree("layout");
+    
+    // Serialize all nodes
+    ValueTree nodesTree = ValueTree("nodes");
+    for (auto node: nodes){
+        ValueTree child = node->serialize();
+        nodesTree.addChild(child, -1, nullptr);
+    }
+    layoutTree.addChild(nodesTree, 0, nullptr);
+    
+    // Serialize cables
+    ValueTree cablesTree = ValueTree("cables");
+    for (auto cable: connections)  {
+        ValueTree child = cable->serialize();
+        cablesTree.addChild(child, -1, nullptr);
+    }
+    layoutTree.addChild(cablesTree, 0, nullptr);
+    
+    ScopedPointer<XmlElement> xml = layoutTree.createXml();
+    bool res = xml->writeToFile(xmlFileName, String::empty);
+    cout << "Layout save to file " << xmlFileName << " result: " << res << endl;
+    return res;
+}
+
+bool MainContentComponent::loadLayoutFromFile(String xmlFileName)
+{
+    cout << "Loading layout from file " << xmlFileName << endl;
+    
+    // Read from xml file
+    File file = File(xmlFileName);
+    XmlDocument xmlDoc(file);
+    ScopedPointer<XmlElement> xml = xmlDoc.getDocumentElement();
+    if (xml == nullptr) {
+        cout << "\tError: can't load xml document" << endl;
+        return false;
+    }
+    
+    ValueTree layout = ValueTree(ValueTree::fromXml(*xml));
+    String tmp = layout.toXmlString();
+    cout << "XML: " << tmp.toStdString() << endl;
+    
+    ValueTree _nodes = layout.getChildWithName("nodes");
+    for (int i=0; i<_nodes.getNumChildren(); i++) {
+        ValueTree node = _nodes.getChild(i);
+        String uuid = node.getProperty("uuid").toString();
+        String name = node.getProperty("name").toString();
+        String libid = node.getProperty("librarian-id").toString();
+        var x = node.getPropertyAsValue("x", nullptr);
+        var y = node.getPropertyAsValue("y", nullptr);
+        cout << "\tLoaded node: " << i << " " << uuid << " " << name << " " << libid << " " << (int)x << ", " << (int)y << endl;
+        
+        
+    }
+
+    clearLayout();
+    return true;
+}
+
+void MainContentComponent::clearLayout()
+{
+    cout << "Clear the layout" << endl;
+    // Delete all cables
+    for (auto cable: connections) {
+        delete cable;
+    }
+    connections.clear();
+    nodes.clearQuick(true);
 }

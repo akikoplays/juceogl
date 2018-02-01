@@ -49,7 +49,6 @@ void LayoutComponent::paint (Graphics& g)
     auto it = connections.begin();
     int i = 0;
     while (it != connections.end()){
-//        cout << "Painting connection " << i++ << endl;
         Connection *conn = *it++;
         assert(conn);
         g.setColour(Colours::white);
@@ -145,5 +144,45 @@ void LayoutComponent::itemDropped (const SourceDetails& dragSourceDetails)
 
 void LayoutComponent::mouseDown(const MouseEvent& e)
 {
-    S::getMainComponent()->deselectAll();
+    if (e.mods.isRightButtonDown()){
+        if (popupMenu.getNumItems() == 0) {
+            popupMenu.addItem (1, "Load layout");
+            popupMenu.addItem (2, "Save layout");
+        }
+        const int result = popupMenu.show();
+        if (result == 0)
+        {
+            // user dismissed the menu without picking anything
+        }
+        else if (result == 1)
+        {
+            // user picked item 1
+            cout << "popupmenu: Load layout" << endl;
+            FileChooser myChooser ("Please select layout file to load",
+                                   File::getSpecialLocation (File::userDesktopDirectory),
+                                   "*.xml");
+            if (myChooser.browseForFileToOpen())
+            {
+                File xmlFile (myChooser.getResult());
+                S::getMainComponent()->loadLayoutFromFile(xmlFile.getFullPathName());
+            }
+        }
+        else if (result == 2)
+        {
+            // user picked item 2
+            cout << "popupmenu: Save layout" << endl;
+            FileChooser myChooser ("Please select where to save the layout",
+                                   File::getSpecialLocation (File::userDesktopDirectory),
+                                   "*.xml");
+            if (myChooser.browseForFileToSave(true))
+            {
+                File xmlFile (myChooser.getResult());
+                S::getMainComponent()->saveLayoutToFile(xmlFile.getFullPathName());
+            }
+        }
+    } else {
+        popupMenu.clear();
+        popupMenu.dismissAllActiveMenus();
+        S::getMainComponent()->deselectAll();
+    }
 }

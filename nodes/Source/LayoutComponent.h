@@ -35,6 +35,7 @@ public:
     void itemDropped (const SourceDetails& dragSourceDetails) override;
 
 private:
+    PopupMenu popupMenu;
     bool somethingIsBeingDraggedOver;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LayoutComponent)
 };

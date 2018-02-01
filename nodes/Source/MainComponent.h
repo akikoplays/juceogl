@@ -188,6 +188,12 @@ public:
     {
         return viewport;
     }
+    // Save current layout to xml file, filename contains absolute path.
+    bool saveLayoutToFile(String xmlFileName);
+    // Load layout from xml file and set it up on screen. This clears the existing layout.
+    bool loadLayoutFromFile(String xmlFileName);
+    // Clear the layout, deletes all Nodes, cables etc.
+    void clearLayout();
     
 private:
     // First viewport that contains LayoutComponent
