@@ -129,9 +129,7 @@ void LayoutComponent::itemDropped (const SourceDetails& dragSourceDetails)
             return;
         }
         
-        NodeComponent *node = new NodeComponent(desc);
-        addAndMakeVisible(node);
-        S::getInstance().mainComponent->addNode(node);
+        NodeComponent *node = createNode(desc);
         
         Point<int> size = NODE_SIZE;
         node->setBounds(dragSourceDetails.localPosition.x - size.x/2, dragSourceDetails.localPosition.y - size.y/2,
@@ -141,6 +139,15 @@ void LayoutComponent::itemDropped (const SourceDetails& dragSourceDetails)
     somethingIsBeingDraggedOver = false;
     repaint();
 }
+
+NodeComponent *LayoutComponent::createNode(ComponentDesc *cdesc)
+{
+    NodeComponent *node = new NodeComponent(cdesc);
+    addAndMakeVisible(node);
+    S::getInstance().mainComponent->addNode(node);
+    return node;
+}
+
 
 void LayoutComponent::mouseDown(const MouseEvent& e)
 {

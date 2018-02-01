@@ -12,6 +12,9 @@
 
 #include "../JuceLibraryCode/JuceHeader.h"
 
+class ComponentDesc;
+class NodeComponent;
+
 //==============================================================================
 /*
 */
@@ -34,6 +37,10 @@ public:
     void itemDragExit (const SourceDetails& /*dragSourceDetails*/) override;
     void itemDropped (const SourceDetails& dragSourceDetails) override;
 
+    // Creates node based on provided component descriptor. Makes it visible and adds it to the scene.
+    NodeComponent *createNode(ComponentDesc *cdesc);
+    NodeComponent *createNode(String cdescstr);
+    
 private:
     PopupMenu popupMenu;
     bool somethingIsBeingDraggedOver;

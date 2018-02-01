@@ -524,14 +524,22 @@ bool MainContentComponent::loadLayoutFromFile(String xmlFileName)
     
     ValueTree _nodes = layout.getChildWithName("nodes");
     for (int i=0; i<_nodes.getNumChildren(); i++) {
-        ValueTree node = _nodes.getChild(i);
-        String uuid = node.getProperty("uuid").toString();
-        String name = node.getProperty("name").toString();
-        String libid = node.getProperty("librarian-id").toString();
-        var x = node.getPropertyAsValue("x", nullptr);
-        var y = node.getPropertyAsValue("y", nullptr);
+        ValueTree _node = _nodes.getChild(i);
+        String uuid = _node.getProperty("uuid").toString();
+        String name = _node.getProperty("name").toString();
+        String libid = _node.getProperty("librarian-id").toString();
+        var x = _node.getPropertyAsValue("x", nullptr);
+        var y = _node.getPropertyAsValue("y", nullptr);
         cout << "\tLoaded node: " << i << " " << uuid << " " << name << " " << libid << " " << (int)x << ", " << (int)y << endl;
         
+        // Create node in the scene
+        ComponentDesc *desc = getLibrarian()->getComponentById(libid);
+        if (desc == nullptr){
+            // TODO
+            // add user friendly and understandable alert here
+            cout << "Error: unknown component encountered" << endl;
+            return false;
+        }
         
     }
 
