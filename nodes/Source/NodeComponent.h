@@ -42,6 +42,8 @@ public:
     void mouseDoubleClick(const MouseEvent &event) override;
 
     const OwnedArray<OutletComponent>& getOutlets();
+    // Returns outlet found by its unique name, as described in the library.
+    OutletComponent *getOutletByName(String name);
     OutletDesc *getOutletDescByOutlet(OutletComponent *outlet);
     void select();
     void deselect();

@@ -194,6 +194,14 @@ OutletDesc *NodeComponent::getOutletDescByOutlet(OutletComponent *outlet)
     return desc->outlets[idx];
 }
 
+OutletComponent *NodeComponent::getOutletByName(String name)
+{
+    for (auto outlet: outlets) {
+        if (outlet->getOutletDesc()->name == name)
+            return outlet;
+    }
+    return nullptr;
+}
 
 void NodeComponent::select()
 {

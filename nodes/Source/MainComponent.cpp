@@ -562,7 +562,18 @@ bool MainContentComponent::loadLayoutFromFile(String xmlFileName)
 
         // TODO
         // Identify outlets and recreate connections
+        NodeComponent *node = findNodeByUuid(nodeA);
+        assert(node);
+        OutletComponent *outlet1 = node->getOutletByName(outletA);
+        assert(outlet1);
+        node = findNodeByUuid(nodeB);
+        assert(node);
+        OutletComponent *outlet2 = node->getOutletByName(outletB);
+        assert(outlet2);
+        
+        createConnection(outlet1, outlet2);
     }
+    repaint();
     
     return true;
 }

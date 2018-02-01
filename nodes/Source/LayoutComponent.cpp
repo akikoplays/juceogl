@@ -146,7 +146,7 @@ void LayoutComponent::itemDropped (const SourceDetails& dragSourceDetails)
 
 NodeComponent *LayoutComponent::createNode(ComponentDesc *cdesc, Uuid _uuid)
 {
-    NodeComponent *node = new NodeComponent(cdesc);
+    NodeComponent *node = new NodeComponent(cdesc, _uuid);
     addAndMakeVisible(node);
     S::getInstance().mainComponent->addNode(node);
     return node;
@@ -160,7 +160,7 @@ NodeComponent *LayoutComponent::createNode(String cdescstr, Uuid _uuid)
         return nullptr;
     }
     
-    NodeComponent *node = createNode(desc);
+    NodeComponent *node = createNode(desc, _uuid);
     return node;
 }
 
