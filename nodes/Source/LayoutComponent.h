@@ -38,8 +38,8 @@ public:
     void itemDropped (const SourceDetails& dragSourceDetails) override;
 
     // Creates node based on provided component descriptor. Makes it visible and adds it to the scene.
-    NodeComponent *createNode(ComponentDesc *cdesc);
-    NodeComponent *createNode(String cdescstr);
+    NodeComponent *createNode(ComponentDesc *cdesc, Uuid _uuid = Uuid::null());
+    NodeComponent *createNode(String cdescstr, Uuid _uuid = Uuid::null());
     void setNodePosition(NodeComponent *node, int x, int y);
     
 private:

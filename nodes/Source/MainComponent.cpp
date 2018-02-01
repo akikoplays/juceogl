@@ -544,12 +544,36 @@ bool MainContentComponent::loadLayoutFromFile(String xmlFileName)
             return false;
         }
         
-        NodeComponent *node = layout->createNode(desc);
+        NodeComponent *node = layout->createNode(desc, uuid);
         assert(node);
         layout->setNodePosition(node, x, y);
     }
 
+    // Load cables and attach them
+    ValueTree _cables = _layout.getChildWithName("cables");
+
+    for (int i=0; i<_cables.getNumChildren(); i++) {
+        ValueTree  _cable = _cables.getChild(i);
+        String nodeA = _cable.getProperty("nodeA").toString();
+        String nodeB = _cable.getProperty("nodeB").toString();
+        String outletA = _cable.getProperty("outletA").toString();
+        String outletB = _cable.getProperty("outletB").toString();
+        String uuid = _cable.getProperty("uuid").toString();
+
+        // TODO
+        // Identify outlets and recreate connections
+    }
+    
     return true;
+}
+
+NodeComponent *MainContentComponent::findNodeByUuid(Uuid uuid)
+{
+    for (auto node: nodes) {
+        if (node->getUuid() == uuid)
+            return node;
+    }
+    return nullptr;
 }
 
 void MainContentComponent::clearLayout()

@@ -194,6 +194,7 @@ public:
     bool loadLayoutFromFile(String xmlFileName);
     // Clear the layout, deletes all Nodes, cables etc.
     void clearLayout();
+    NodeComponent *findNodeByUuid(Uuid uuid);
     
 private:
     // First viewport that contains LayoutComponent

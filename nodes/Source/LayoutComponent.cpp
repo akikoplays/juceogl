@@ -144,7 +144,7 @@ void LayoutComponent::itemDropped (const SourceDetails& dragSourceDetails)
     repaint();
 }
 
-NodeComponent *LayoutComponent::createNode(ComponentDesc *cdesc)
+NodeComponent *LayoutComponent::createNode(ComponentDesc *cdesc, Uuid _uuid)
 {
     NodeComponent *node = new NodeComponent(cdesc);
     addAndMakeVisible(node);
@@ -152,7 +152,7 @@ NodeComponent *LayoutComponent::createNode(ComponentDesc *cdesc)
     return node;
 }
 
-NodeComponent *LayoutComponent::createNode(String cdescstr)
+NodeComponent *LayoutComponent::createNode(String cdescstr, Uuid _uuid)
 {
     ComponentDesc *desc = S::getInstance().mainComponent->getLibrarian()->getComponentById(cdescstr);
     if (desc == nullptr){
