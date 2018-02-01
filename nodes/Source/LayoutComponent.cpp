@@ -122,19 +122,23 @@ void LayoutComponent::itemDropped (const SourceDetails& dragSourceDetails)
         cout << "drag state: " << somethingIsBeingDraggedOver << endl;
         cout << "pos: " << dragSourceDetails.localPosition.x << ", " << dragSourceDetails.localPosition.y << endl;
         
-        // Create node based on what's dragged into the screen
-        ComponentDesc *desc = S::getInstance().mainComponent->getLibrarian()->getComponentById(dragSourceDetails.description.toString());
-        if (desc == nullptr){
-            cout << "Error: unknown component dragged over" << endl;
-            return;
-        }
+//        // Create node based on what's dragged into the screen
+//        ComponentDesc *desc = S::getInstance().mainComponent->getLibrarian()->getComponentById(dragSourceDetails.description.toString());
+//        if (desc == nullptr){
+//            cout << "Error: unknown component dragged over" << endl;
+//            return;
+//        }
+//
+//        NodeComponent *node = createNode(desc);
         
-        NodeComponent *node = createNode(desc);
+        // Create node based on Component ID as stored in librarian lib file (that's what's passed over during drag and drop from
+        // librarian onto the layout component
+        NodeComponent *node = createNode(dragSourceDetails.description.toString());
         
         Point<int> size = NODE_SIZE;
-        node->setBounds(dragSourceDetails.localPosition.x - size.x/2, dragSourceDetails.localPosition.y - size.y/2,
-                        size.x, size.y);
-        
+//        node->setBounds(dragSourceDetails.localPosition.x - size.x/2, dragSourceDetails.localPosition.y - size.y/2,
+//                        size.x, size.y);
+        setNodePosition(node, dragSourceDetails.localPosition.x - size.x/2, dragSourceDetails.localPosition.y - size.y/2);
     }
     somethingIsBeingDraggedOver = false;
     repaint();
@@ -148,6 +152,24 @@ NodeComponent *LayoutComponent::createNode(ComponentDesc *cdesc)
     return node;
 }
 
+NodeComponent *LayoutComponent::createNode(String cdescstr)
+{
+    ComponentDesc *desc = S::getInstance().mainComponent->getLibrarian()->getComponentById(cdescstr);
+    if (desc == nullptr){
+        cout << "Error: unknown component dragged over" << endl;
+        return nullptr;
+    }
+    
+    NodeComponent *node = createNode(desc);
+    return node;
+}
+
+void LayoutComponent::setNodePosition(NodeComponent *node, int x, int y)
+{
+    Point<int> size = NODE_SIZE;
+    node->setBounds(x, y,
+                    size.x, size.y);
+}
 
 void LayoutComponent::mouseDown(const MouseEvent& e)
 {

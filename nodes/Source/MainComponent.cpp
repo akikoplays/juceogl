@@ -518,11 +518,14 @@ bool MainContentComponent::loadLayoutFromFile(String xmlFileName)
         return false;
     }
     
-    ValueTree layout = ValueTree(ValueTree::fromXml(*xml));
-    String tmp = layout.toXmlString();
+    // Evict existing layout
+    clearLayout();
+
+    ValueTree _layout = ValueTree(ValueTree::fromXml(*xml));
+    String tmp = _layout.toXmlString();
     cout << "XML: " << tmp.toStdString() << endl;
     
-    ValueTree _nodes = layout.getChildWithName("nodes");
+    ValueTree _nodes = _layout.getChildWithName("nodes");
     for (int i=0; i<_nodes.getNumChildren(); i++) {
         ValueTree _node = _nodes.getChild(i);
         String uuid = _node.getProperty("uuid").toString();
@@ -541,9 +544,11 @@ bool MainContentComponent::loadLayoutFromFile(String xmlFileName)
             return false;
         }
         
+        NodeComponent *node = layout->createNode(desc);
+        assert(node);
+        layout->setNodePosition(node, x, y);
     }
 
-    clearLayout();
     return true;
 }
 

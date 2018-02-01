@@ -40,6 +40,7 @@ public:
     // Creates node based on provided component descriptor. Makes it visible and adds it to the scene.
     NodeComponent *createNode(ComponentDesc *cdesc);
     NodeComponent *createNode(String cdescstr);
+    void setNodePosition(NodeComponent *node, int x, int y);
     
 private:
     PopupMenu popupMenu;
