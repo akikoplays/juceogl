@@ -125,7 +125,9 @@ MainContentComponent::MainContentComponent()
     
     // Present librarian toolbox
     librarian = new LibrarianComponent();
-    addAndMakeVisible(librarian);
+//    addAndMakeVisible(librarian);
+    viewportLibrarian.setViewedComponent(librarian);
+    addAndMakeVisible(viewportLibrarian);
     
     // Sanity check
     S::getInstance().mainComponent = this;
@@ -143,19 +145,31 @@ MainContentComponent::~MainContentComponent()
     String appFolder = LibrarianComponent::getAppFolder();
     String xmlFileName = appFolder + "layout.xml";
     ValueTree layoutTree = ValueTree("layout");
+    
+    // Serialize all nodes
     ValueTree nodesTree = ValueTree("nodes");
     for (auto node: nodes){
-//        ValueTree child = ValueTree("node");
-//        child.setProperty("uuid", "UUIDSTRING", nullptr);
-//        child.setProperty("librarian-id", "Librarian ID string", nullptr);
-//        child.setProperty("name", node->getName(), nullptr);
         ValueTree child = node->serialize();
         nodesTree.addChild(child, -1, nullptr);
     }
     layoutTree.addChild(nodesTree, 0, nullptr);
 
+    // Serialize cables
+    ValueTree cablesTree = ValueTree("cables");
+    for (auto cable: connections)  {
+        ValueTree child = cable->serialize();
+        cablesTree.addChild(child, -1, nullptr);
+    }
+    layoutTree.addChild(cablesTree, 0, nullptr);
+
     ScopedPointer<XmlElement> xml = layoutTree.createXml();
     xml->writeToFile(xmlFileName, String::empty);
+    
+    // Delete all cables
+    for (auto cable: connections) {
+        delete cable;
+    }
+    connections.clear();
 }
 
 MainContentComponent::ValidationResult MainContentComponent::validateConnection(OutletComponent *a, OutletComponent *b)
@@ -198,10 +212,10 @@ MainContentComponent::ValidationResult MainContentComponent::validateConnection(
     return {0, ""};
 }
 
-bool MainContentComponent::createConnection(OutletComponent *a, OutletComponent *b)
+bool MainContentComponent::createConnection(OutletComponent *a, OutletComponent *b, Uuid uuid)
 {
     cout << "Creating new connection" << endl;
-    Connection *conn = new Connection(a, b);
+    Connection *conn = new Connection(a, b, uuid);
     connections.push_back(conn);
     a->addCable(conn);
     b->addCable(conn);
@@ -470,7 +484,12 @@ void MainContentComponent::resized()
 
     // Update Layout and Librarian positions
     auto lr = r.removeFromRight(128);
-    librarian->setBounds(lr);
+//    librarian->setBounds(lr);
+    viewportLibrarian.setBounds(lr);
+    // TODO
+    // This needs to be set dynamically by the Librarian?
+    librarian->setBounds(0, 0, lr.getWidth()-10, lr.getHeight());
+    
 //    layout->setBounds(r);
     viewport.setBounds(r);
     // TODO provisionally lets set this to some insane size

@@ -16,23 +16,55 @@
 
 class OutletComponent;
 
-class Connection {
+using namespace std;
+
+class Connection : public Component {
 public:
-    Connection(OutletComponent *_a, OutletComponent *_b)
+    Connection(OutletComponent *_a, OutletComponent *_b, Uuid _uuid=Uuid::null())
     {
+        // When cable is loaded from layout file, Uuid is provided, otherwise it is calculated.
+        if (_uuid.isNull())
+            uuid = Uuid();
+        else
+            uuid = _uuid;
+        
         a = _a;
         b = _b;
+        
+        cout << "connection created " + uuid.toString() << endl;
     };
     
-    ~Connection() {};
+    ~Connection()
+    {
+        cout << "connection destroyed " + uuid.toString() << endl;
+    };
+    
     bool linksToOutlet(OutletComponent *outlet)
     {
         return (outlet == a || outlet == b);
     }
-        
+
+    ValueTree serialize()
+    {
+        ValueTree child = ValueTree("cable");
+        child.setProperty("uuid", uuid.toString(), nullptr);
+        child.setProperty("nodeA", a->getNode()->getUuid().toString(), nullptr);
+        child.setProperty("nodeB", b->getNode()->getUuid().toString(), nullptr);
+        OutletDesc *odesc = a->getOutletDesc();
+        child.setProperty("outletA", odesc->name, nullptr);
+        odesc = b->getOutletDesc();
+        child.setProperty("outletB", odesc->name, nullptr);
+
+        return child;
+    }
+    
 public:
     OutletComponent *a;
     OutletComponent *b;
+
+private:
+    Uuid uuid;
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Connection)
 };
 
 //==============================================================================
@@ -120,7 +152,7 @@ public:
     // Validates connection following predefined set of rules, and returns true if it's ok.
     ValidationResult validateConnection(OutletComponent *a, OutletComponent *b);
     // Creates and registers new connection object.
-    bool createConnection(OutletComponent *a, OutletComponent *b);
+    bool createConnection(OutletComponent *a, OutletComponent *b, Uuid uuid=nullptr);
     // Return list of cables.
     std::vector<Connection*> getConnections() {return connections;};
     // Removes specific connection from vector, calls delete().
@@ -158,7 +190,10 @@ public:
     }
     
 private:
+    // First viewport that contains LayoutComponent
     Viewport viewport;
+    // Second viewport that contains LibrarianComponent
+    Viewport viewportLibrarian;
     CallOutBox *optionsCallout;
     OutletComponent *selectedOutletA;
     OutletComponent *selectedOutletB;

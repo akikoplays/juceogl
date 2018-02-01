@@ -49,7 +49,7 @@ void LayoutComponent::paint (Graphics& g)
     auto it = connections.begin();
     int i = 0;
     while (it != connections.end()){
-        cout << "Painting connection " << i++ << endl;
+//        cout << "Painting connection " << i++ << endl;
         Connection *conn = *it++;
         assert(conn);
         g.setColour(Colours::white);
@@ -130,7 +130,7 @@ void LayoutComponent::itemDropped (const SourceDetails& dragSourceDetails)
             return;
         }
         
-        NodeComponent *node = new NodeComponent(desc, Uuid());
+        NodeComponent *node = new NodeComponent(desc);
         addAndMakeVisible(node);
         S::getInstance().mainComponent->addNode(node);
         

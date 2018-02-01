@@ -14,6 +14,7 @@
 
 class Connection;
 class NodeComponent;
+class OutletDesc;
 
 class OutletParamBlock {
 public:
@@ -41,7 +42,7 @@ class OutletComponent    :  public Component,
 {
 public:
     
-    OutletComponent(NodeComponent *parent, OutletParamBlock::Type type, OutletParamBlock::Direction direction);
+    OutletComponent(NodeComponent *parent, OutletDesc *_odesc, OutletParamBlock::Type type, OutletParamBlock::Direction direction);
     ~OutletComponent();
 
     void paint (Graphics&) override;
@@ -76,6 +77,8 @@ public:
     Point<int> getStrainReliefPos();
     // Return parent node.
     NodeComponent *getNode();
+    // Return outlet descriptor.
+    OutletDesc *getOutletDesc();
     
 private:
     // Parent node component containing this outlet.
@@ -83,6 +86,8 @@ private:
     // Each connection established with the outlet is added to this vector.
     std::vector<Connection *> cables;
     OutletParamBlock desc;
+    // Pointer to Outlet descriptor as provided by Librarian, used for fast lookup
+    OutletDesc *odesc;
     bool signalizing;
     bool signalState;
     Colour signalColor;

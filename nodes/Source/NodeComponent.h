@@ -31,7 +31,7 @@ class NodeComponent    : public Component
 {
 public:
     // Create node according to the descriptor received from LibrarianComponent via drag and drop.
-    NodeComponent(ComponentDesc *_desc, Uuid _uuid);
+    NodeComponent(ComponentDesc *_desc, Uuid _uuid=Uuid::null());
     ~NodeComponent();
 
     void paint (Graphics&) override;
@@ -45,6 +45,7 @@ public:
     OutletDesc *getOutletDescByOutlet(OutletComponent *outlet);
     void select();
     void deselect();
+    Uuid getUuid();
     ValueTree serialize();
 
 private:

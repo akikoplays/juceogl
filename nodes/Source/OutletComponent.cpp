@@ -18,10 +18,11 @@ using namespace std;
 #define STRAIN_RELIEF_OFFSET 20 // Offset in pixels
 
 //==============================================================================
-OutletComponent::OutletComponent(NodeComponent* parent, OutletParamBlock::Type type, OutletParamBlock::Direction direction)
+OutletComponent::OutletComponent(NodeComponent* parent, OutletDesc *_odesc, OutletParamBlock::Type type, OutletParamBlock::Direction direction)
 {
     // In your constructor, you should add any child components, and
     // initialise any special settings that your component needs.
+    odesc = _odesc;
     desc.type = type;
     desc.direction = direction;
     signalizing = false;
@@ -106,16 +107,6 @@ void OutletComponent::paint (Graphics& g)
        drawing code..
     */
     g.fillAll (activeColor);   // clear the background
-
-    // Calulate new position
-//    Component *w = findParentComponentOfClass<DocumentWindow>();
-//    auto wr = w->getBoundsInParent();
-//    Point<int> ret(0,0);
-//    windowPosition.x = getScreenX() - wr.getX() + getWidth()/2;
-//    windowPosition.y = getScreenY() - wr.getY() + getHeight()/2;
-    
-//    cout << "outlet pos: " << windowPosition.x << " " << windowPosition.y << endl;
-
 }
 
 void OutletComponent::resized()
@@ -131,16 +122,7 @@ Point<int> OutletComponent::getWindowPos()
     auto r = node->getBoundsInParent();
     auto r2 = getBoundsInParent();
     
-    return Point<int>(r.getX() + r2.getX(), r.getY() + r2.getY());
-    
-//    return windowPosition;
-    
-    // If previous doesn't work, this will for sure.
-//    auto r = getBoundsInParent();
-//    auto r2 = getParentComponent()->getBoundsInParent();
-//
-//    cout << "outlet pos: " << r.getX() + r2.getX() << " " << r.getY() + r2.getY() << endl;
-//    return Point<int>(r.getX() + r2.getX() + getWidth()/2, r.getY() + r2.getY() + getHeight()/2);
+    return Point<int>(r.getX() + r2.getX(), r.getY() + r2.getY() + getHeight()/2);
 }
 
 void OutletComponent::timerCallback()
@@ -204,4 +186,9 @@ bool OutletComponent::isRatingCompatible(OutletComponent *outlet2)
 NodeComponent *OutletComponent::getNode()
 {
     return node;
+}
+
+OutletDesc *OutletComponent::getOutletDesc()
+{
+    return odesc;
 }

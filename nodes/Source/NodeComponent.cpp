@@ -54,6 +54,7 @@ NodeComponent::NodeComponent(ComponentDesc *_desc, Uuid _uuid)
     for (int i=0; i<desc->outlets.size(); i++) {
         // Note that pins have the same order as the desc->outlets[] array.
         OutletComponent *pin = new OutletComponent(this,
+                                                   desc->outlets[i],
                                                    desc->outlets[i]->type,
                                                    desc->outlets[i]->direction);
         addAndMakeVisible(pin);
@@ -214,6 +215,12 @@ ValueTree NodeComponent::serialize()
     child.setProperty("uuid", uuid.toString(), nullptr);
     child.setProperty("librarian-id", this->desc->cid, nullptr);
     child.setProperty("name", getName(), nullptr);
+    child.setProperty("x", getX(), nullptr);
+    child.setProperty("y", getY(), nullptr);
     return child;
 }
 
+Uuid NodeComponent::getUuid()
+{
+    return uuid;
+}

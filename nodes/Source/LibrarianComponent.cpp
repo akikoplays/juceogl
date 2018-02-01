@@ -184,8 +184,11 @@ void LibrarianComponent::resized()
 {
     // This method is where you should set the bounds of any child
     // components that your component contains..
-    
+
     Point<int>size = BUTTON_SIZE;
+
+    setBounds(0, 0, getWidth(), (buttons.size() + 5) * size.y);
+
     auto r = getLocalBounds();
     for (int i=0; i<buttons.size(); i++) {
         TextButton *b = buttons[i];
@@ -193,6 +196,8 @@ void LibrarianComponent::resized()
         b->setBounds(p);
         addAndMakeVisible(b);
     }
+    
+
 }
 
 void LibrarianComponent::addButton(ComponentDesc *cdesc)
