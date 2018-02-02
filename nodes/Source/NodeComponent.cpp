@@ -48,7 +48,8 @@ NodeComponent::NodeComponent(ComponentDesc *_desc, Uuid _uuid)
     else
         uuid = _uuid;
     
-    cout << "Creating node instance for: " << desc->name << endl;
+    S::getConsole()->print("Creating node instance for: " + desc->name);
+    
     setName(desc->name);
     
     for (int i=0; i<desc->outlets.size(); i++) {
@@ -64,7 +65,7 @@ NodeComponent::NodeComponent(ComponentDesc *_desc, Uuid _uuid)
 
 NodeComponent::~NodeComponent()
 {
-    cout << "Node " << getName() << " deconstructor called" << endl;
+    S::getConsole()->print("Node " + getName() + " deconstructor called");
 }
 
 void NodeComponent::paint (Graphics& g)
@@ -205,14 +206,14 @@ OutletComponent *NodeComponent::getOutletByName(String name)
 
 void NodeComponent::select()
 {
-    cout << "Node selected." << endl;
+    S::getConsole()->print("Node selected.");
     selected = true;
     repaint();
 }
 
 void NodeComponent::deselect()
 {
-    cout << "Node deselected." << endl;
+    S::getConsole()->print("Node deselected.");
     selected = false;
     repaint();
 }

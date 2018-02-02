@@ -10,6 +10,8 @@
 
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "LibrarianComponent.h"
+#include "MainComponent.h"
+#include "ConsoleComponent.h"
 
 using namespace std;
 
@@ -28,13 +30,14 @@ LibrarianComponent::LibrarianComponent()
 {
     // In your constructor, you should add any child components, and
     // initialise any special settings that your component needs.
+    S::getConsole()->print("Initializing Librarian");
 
     // Load library from json file
     String jsonStr;
     String path = LibrarianComponent::getAppFolder() + "mainlib.json";
     File file(path);
     if (!file.exists()) {
-        cout << "-- can't open main library" << endl;
+        S::getConsole()->print("Warning: can't open main library (mainlib.json) file");
     } else {
         jsonStr = file.loadFileAsString();
 
@@ -48,7 +51,7 @@ LibrarianComponent::LibrarianComponent()
             
             for (int i = 0; i < props.size(); ++i)
             {
-                cout << i << ": Component " << props.getName(i).toString().toStdString() << endl;
+                S::getConsole()->print(String(i) + ": Component " + props.getName(i).toString().toStdString());
                 const Identifier id (props.getName (i));
                 var child (props[id]);
                 jassert (! child.isVoid());
@@ -63,8 +66,8 @@ LibrarianComponent::LibrarianComponent()
                         cdesc->name = subprops.getValueAt(i).toString();
                     }
                     
-                    cout << "-- " << subprops.getName(i).toString() << ": " << subprops.getValueAt(i).toString() << endl;
-
+                    S::getConsole()->print("-- " + subprops.getName(i).toString() + ": " + subprops.getValueAt(i).toString());
+                    
                     const Identifier id (subprops.getName (i));
                     var child (subprops[id]);
                     jassert (! child.isVoid());
@@ -75,7 +78,7 @@ LibrarianComponent::LibrarianComponent()
                         NamedValueSet& subprops (child.getDynamicObject()->getProperties());
                         for (int i = 0; i < subprops.size(); ++i)
                         {
-                            cout << "\t-- outlet " << i << ": " << subprops.getName(i).toString() << endl;
+                            S::getConsole()->print("\t-- outlet " + String(i) + ": " + subprops.getName(i).toString());
                             const Identifier id (subprops.getName (i));
                             var child (subprops[id]);
                             jassert (! child.isVoid());
@@ -87,8 +90,9 @@ LibrarianComponent::LibrarianComponent()
                             NamedValueSet& subprops(child.getDynamicObject()->getProperties());
                             for (int i = 0; i < subprops.size(); ++i)
                             {
-                                cout << "\t\t-- " << subprops.getName(i).toString().toStdString();
-                                cout << ": " << subprops.getValueAt(i).toString() << endl;
+                                S::getConsole()->print("\t\t-- "
+                                                       + subprops.getName(i).toString().toStdString()
+                                                       + ": " + subprops.getValueAt(i).toString());
                                 
                                 // Should strongly typed conversion be done here? hmm..
                                 // or just map all the values, and then convert else where.
@@ -114,14 +118,15 @@ LibrarianComponent::LibrarianComponent()
                                     var rating = subprops.getValueAt(i);
                                     if (rating.isArray()) {
                                         if (rating.size() != 2){
-                                            cout << "\t\t-- error: if rating is range, then it must have two values, ie [220,500]" << endl;
+                                            S::getConsole()->print("\t\t-- error: if rating is range, then it must have two values, ie [220,500]");
+                                            
                                             continue;
                                         }
-                                        cout << "\t\t-- rating is range: " << rating[0].toString() << " to " << rating[1].toString();
+                                        S::getConsole()->print("\t\t-- rating is range: " + rating[0].toString() + " to " + rating[1].toString());
                                         odesc->rating[0] = rating[0];
                                         odesc->rating[1] = rating[1];
                                     } else {
-                                        cout << "\t\t-- rating is fixed value: " << rating.toString();
+                                        S::getConsole()->print("\t\t-- rating is fixed value: " + rating.toString());
                                         odesc->rating[0] = rating;
                                         odesc->rating[1] = rating;
                                     }
@@ -197,7 +202,6 @@ void LibrarianComponent::resized()
         addAndMakeVisible(b);
     }
     
-
 }
 
 void LibrarianComponent::addButton(ComponentDesc *cdesc)

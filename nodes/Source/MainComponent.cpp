@@ -11,6 +11,7 @@
 #include "OutletComponent.h"
 #include "OntopComponent.h"
 #include "LibrarianComponent.h"
+#include "ConsoleComponent.h"
 
 using namespace std;
 
@@ -39,7 +40,7 @@ OutletOptionsComponent::~OutletOptionsComponent()
 void OutletOptionsComponent::buttonClicked(Button *button)
 {
     if (button == &disconnectAllButton) {
-        cout << "Disconnect all pressed" << endl;
+//        cout << "Disconnect all pressed" << endl;
         S::getMainComponent()->killAllCablesForOutlet(parent);
     } else if (button == &disconnectSingleButton) {
         cout << "Disconnect single pressed" << endl;
@@ -115,8 +116,15 @@ void NodeOptionsComponent::resized()
 MainContentComponent::MainContentComponent()
 : optionsCallout(nullptr), selectedOutletA(nullptr), selectedOutletB(nullptr), somethingIsBeingDraggedOver(false)
 {
+    // Sanity check
+    S::getInstance().mainComponent = this;
+    assert(S::getMainComponent() == this);
+
+    // Must instantiate this first
+    console = new ConsoleComponent();
+    addAndMakeVisible(console);
+
     // Present layout component
-    
     layout = new LayoutComponent();
 //    addAndMakeVisible(layout);
     viewport.setViewedComponent(layout, false);
@@ -128,10 +136,6 @@ MainContentComponent::MainContentComponent()
 //    addAndMakeVisible(librarian);
     viewportLibrarian.setViewedComponent(librarian);
     addAndMakeVisible(viewportLibrarian);
-    
-    // Sanity check
-    S::getInstance().mainComponent = this;
-    assert(S::getMainComponent() == this);
     
     // Main update timer used for animating elements on screen
     startTimerHz(50);
@@ -368,13 +372,13 @@ bool MainContentComponent::removeAndDeleteConnection(Cable *cable)
 
 void MainContentComponent::killAllCablesForOutlet(OutletComponent *outlet)
 {
-    cout << "Kill all cables for outlet " << outlet->getName() <<  endl;
+    console->print("Kill all cables for outlet " + outlet->getName());
     auto list = getConnectionsLinkedToOutlet(outlet);
     static int i = 0;
     for (auto it = list.begin(); it != list.end(); it++, i++){
         Cable *c = *it;
         removeAndDeleteConnection(c);
-        cout << "-- killed cable " << i << endl;
+        console->print("-- killed cable " + String(i));
     }
     
     // For redraw, theater has changed.
@@ -383,7 +387,7 @@ void MainContentComponent::killAllCablesForOutlet(OutletComponent *outlet)
 
 void MainContentComponent::killAllCablesForNode(NodeComponent *node)
 {
-    cout << "Kill all cables for node " << node->getName() <<  endl;
+    console->print("Kill all cables for node " + node->getName());
     const OwnedArray<OutletComponent> &outlets = node->getOutlets();
     for (int i=0; i<outlets.size(); i++) {
         killAllCablesForOutlet(outlets[i]);
@@ -392,13 +396,10 @@ void MainContentComponent::killAllCablesForNode(NodeComponent *node)
 
 void MainContentComponent::removeAndDeleteNode(NodeComponent *node)
 {
-    cout << "Deleting node: " << node->getName() << endl;
-    
+    console->print("Deleting node: " + node->getName());
     for (int i=0; i<nodes.size(); i++) {
         if(nodes[i] != node)
             continue;
-        cout << "-- found"<<endl;
-        
         // Detach all cables from this node.
         killAllCablesForNode(node);
         // note that remove() will call object's destructor.
@@ -453,7 +454,7 @@ void MainContentComponent::resized()
     // update their positions.
     
     auto r = getLocalBounds();
-
+    
     // Update Layout and Librarian positions
     auto lr = r.removeFromRight(128);
 //    librarian->setBounds(lr);
@@ -461,7 +462,10 @@ void MainContentComponent::resized()
     // TODO
     // This needs to be set dynamically by the Librarian?
     librarian->setBounds(0, 0, lr.getWidth()-10, lr.getHeight());
-    
+
+    auto cr = r.removeFromBottom(100);
+    console->setBounds(cr);
+
 //    layout->setBounds(r);
     viewport.setBounds(r);
     // TODO provisionally lets set this to some insane size
@@ -501,20 +505,19 @@ bool MainContentComponent::saveLayoutToFile(String xmlFileName)
     
     ScopedPointer<XmlElement> xml = layoutTree.createXml();
     bool res = xml->writeToFile(xmlFileName, String::empty);
-    cout << "Layout save to file " << xmlFileName << " result: " << res << endl;
+    console->print("Layout save to file " + xmlFileName + " result: " + (res ? "OK" : "FAIL"));
     return res;
 }
 
 bool MainContentComponent::loadLayoutFromFile(String xmlFileName)
 {
-    cout << "Loading layout from file " << xmlFileName << endl;
-    
+    console->print("Loading layout from file " + xmlFileName);
     // Read from xml file
     File file = File(xmlFileName);
     XmlDocument xmlDoc(file);
     ScopedPointer<XmlElement> xml = xmlDoc.getDocumentElement();
     if (xml == nullptr) {
-        cout << "\tError: can't load xml document" << endl;
+        console->print("\tError: can't load xml document");
         return false;
     }
     
@@ -523,7 +526,7 @@ bool MainContentComponent::loadLayoutFromFile(String xmlFileName)
 
     ValueTree _layout = ValueTree(ValueTree::fromXml(*xml));
     String tmp = _layout.toXmlString();
-    cout << "XML: " << tmp.toStdString() << endl;
+    console->print("XML: " + tmp.toStdString());
     
     ValueTree _nodes = _layout.getChildWithName("nodes");
     for (int i=0; i<_nodes.getNumChildren(); i++) {
@@ -533,14 +536,17 @@ bool MainContentComponent::loadLayoutFromFile(String xmlFileName)
         String libid = _node.getProperty("librarian-id").toString();
         var x = _node.getPropertyAsValue("x", nullptr);
         var y = _node.getPropertyAsValue("y", nullptr);
-        cout << "\tLoaded node: " << i << " " << uuid << " " << name << " " << libid << " " << (int)x << ", " << (int)y << endl;
-        
+        console->print("\tLoaded node: "
+                       + String(i) + " " + uuid + " "
+                       + name + " " + libid + " at pos: "
+                       + String((int)x) + ", " + String((int)y));
+
         // Create node in the scene
         ComponentDesc *desc = getLibrarian()->getComponentById(libid);
         if (desc == nullptr){
             // TODO
             // add user friendly and understandable alert here
-            cout << "Error: unknown component encountered" << endl;
+            console->print("Error: unknown component encountered");
             return false;
         }
         
@@ -589,7 +595,7 @@ NodeComponent *MainContentComponent::findNodeByUuid(Uuid uuid)
 
 void MainContentComponent::clearLayout()
 {
-    cout << "Clear the layout" << endl;
+    console->print("Reset layout");
     // Delete all cables
     for (auto cable: cables) {
         delete cable;

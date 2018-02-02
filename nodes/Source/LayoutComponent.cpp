@@ -122,22 +122,11 @@ void LayoutComponent::itemDropped (const SourceDetails& dragSourceDetails)
         cout << "drag state: " << somethingIsBeingDraggedOver << endl;
         cout << "pos: " << dragSourceDetails.localPosition.x << ", " << dragSourceDetails.localPosition.y << endl;
         
-//        // Create node based on what's dragged into the screen
-//        ComponentDesc *desc = S::getInstance().mainComponent->getLibrarian()->getComponentById(dragSourceDetails.description.toString());
-//        if (desc == nullptr){
-//            cout << "Error: unknown component dragged over" << endl;
-//            return;
-//        }
-//
-//        NodeComponent *node = createNode(desc);
-        
         // Create node based on Component ID as stored in librarian lib file (that's what's passed over during drag and drop from
         // librarian onto the layout component
         NodeComponent *node = createNode(dragSourceDetails.description.toString());
         
         Point<int> size = NODE_SIZE;
-//        node->setBounds(dragSourceDetails.localPosition.x - size.x/2, dragSourceDetails.localPosition.y - size.y/2,
-//                        size.x, size.y);
         setNodePosition(node, dragSourceDetails.localPosition.x - size.x/2, dragSourceDetails.localPosition.y - size.y/2);
     }
     somethingIsBeingDraggedOver = false;
@@ -156,7 +145,7 @@ NodeComponent *LayoutComponent::createNode(String cdescstr, Uuid _uuid)
 {
     ComponentDesc *desc = S::getInstance().mainComponent->getLibrarian()->getComponentById(cdescstr);
     if (desc == nullptr){
-        cout << "Error: unknown component dragged over" << endl;
+        S::getConsole()->print("Error: unknown component dragged over: " + cdescstr);
         return nullptr;
     }
     
@@ -186,7 +175,7 @@ void LayoutComponent::mouseDown(const MouseEvent& e)
         else if (result == 1)
         {
             // user picked item 1
-            cout << "popupmenu: Load layout" << endl;
+            S::getConsole()->print("Popupmenu: Load layout form file");
             FileChooser myChooser ("Please select layout file to load",
                                    File::getSpecialLocation (File::userDesktopDirectory),
                                    "*.xml");
@@ -199,7 +188,7 @@ void LayoutComponent::mouseDown(const MouseEvent& e)
         else if (result == 2)
         {
             // user picked item 2
-            cout << "popupmenu: Save layout" << endl;
+            S::getConsole()->print("Popupmenu: Save layout");
             FileChooser myChooser ("Please select where to save the layout",
                                    File::getSpecialLocation (File::userDesktopDirectory),
                                    "*.xml");

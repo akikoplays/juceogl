@@ -13,6 +13,7 @@
 #include "NodeComponent.h"
 #include "OntopComponent.h"
 #include "LayoutComponent.h"
+#include "ConsoleComponent.h"
 
 class OutletComponent;
 
@@ -194,8 +195,13 @@ public:
     bool loadLayoutFromFile(String xmlFileName);
     // Clear the layout, deletes all Nodes, cables etc.
     void clearLayout();
+    // Return node from the nodes collection with the given uuid. Or nullptr if not found.
     NodeComponent *findNodeByUuid(Uuid uuid);
-    
+    // Return console.
+    ConsoleComponent *getConsole()
+    {
+        return console;
+    }
 private:
     // First viewport that contains LayoutComponent
     Viewport viewport;
@@ -206,6 +212,7 @@ private:
     OutletComponent *selectedOutletB;
     ScopedPointer<LibrarianComponent> librarian;
     ScopedPointer<LayoutComponent> layout;
+    ScopedPointer<ConsoleComponent> console;
     OwnedArray<NodeComponent> nodes;
     std::vector<NodeComponent*> selectedNodes;
     std::vector<Cable*> cables;
@@ -229,6 +236,11 @@ public:
     static MainContentComponent *getMainComponent()
     {
         return S::getInstance().mainComponent;
+    }
+    
+    static ConsoleComponent *getConsole()
+    {
+        return S::getMainComponent()->getConsole();
     }
     
 private:

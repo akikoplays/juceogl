@@ -55,7 +55,7 @@ void OutletComponent::mouseUp(const MouseEvent& e)
         return;
     
     // Select outlet
-    cout << "Outlet selected." << endl;
+    S::getConsole()->print("Outlet selected: " + getName());
     S::getMainComponent()->selectOutlet(this);
 }
 
