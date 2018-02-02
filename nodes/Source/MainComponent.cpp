@@ -187,8 +187,8 @@ MainContentComponent::ValidationResult MainContentComponent::validateConnection(
 bool MainContentComponent::createConnection(OutletComponent *a, OutletComponent *b, Uuid uuid)
 {
     cout << "Creating new connection" << endl;
-    Connection *conn = new Connection(a, b, uuid);
-    connections.push_back(conn);
+    Cable *conn = new Cable(a, b, uuid);
+    cables.push_back(conn);
     a->addCable(conn);
     b->addCable(conn);
     cout << "-- registered" << endl;
@@ -339,11 +339,11 @@ void MainContentComponent::moveSelectedNodes(NodeComponent* chief, Point<int> de
     }
 }
 
-std::vector<Connection *> MainContentComponent::getConnectionsLinkedToOutlet(OutletComponent *outlet)
+std::vector<Cable *> MainContentComponent::getConnectionsLinkedToOutlet(OutletComponent *outlet)
 {
-    std::vector<Connection *> list;
-    for (auto it = connections.begin(); it != connections.end(); it++) {
-        Connection *c = *it;
+    std::vector<Cable *> list;
+    for (auto it = cables.begin(); it != cables.end(); it++) {
+        Cable *c = *it;
         if (!c->linksToOutlet(outlet))
             continue;
         list.push_back(c);
@@ -351,15 +351,15 @@ std::vector<Connection *> MainContentComponent::getConnectionsLinkedToOutlet(Out
     return list;
 }
 
-bool MainContentComponent::removeAndDeleteConnection(Connection *cable)
+bool MainContentComponent::removeAndDeleteConnection(Cable *cable)
 {
     cout << "Remove and delete a connection" << endl;
-    for (auto it = connections.begin(); it != connections.end(); it++) {
-        Connection *c = *it;
+    for (auto it = cables.begin(); it != cables.end(); it++) {
+        Cable *c = *it;
         if (c != cable)
             continue;
         delete(c);
-        connections.erase(it);
+        cables.erase(it);
         cout << "-- erased connection" << endl;
         return true;
     }
@@ -372,7 +372,7 @@ void MainContentComponent::killAllCablesForOutlet(OutletComponent *outlet)
     auto list = getConnectionsLinkedToOutlet(outlet);
     static int i = 0;
     for (auto it = list.begin(); it != list.end(); it++, i++){
-        Connection *c = *it;
+        Cable *c = *it;
         removeAndDeleteConnection(c);
         cout << "-- killed cable " << i << endl;
     }
@@ -417,10 +417,10 @@ void MainContentComponent::removeAndDeleteSelectedNodes()
     selectedNodes.clear();
 }
 
-Connection *MainContentComponent::getConnectionByOutlets(OutletComponent *a, OutletComponent *b)
+Cable *MainContentComponent::getConnectionByOutlets(OutletComponent *a, OutletComponent *b)
 {
-    for (auto it = connections.begin(); it != connections.end(); it++) {
-        Connection *c = *it;
+    for (auto it = cables.begin(); it != cables.end(); it++) {
+        Cable *c = *it;
         if (c->linksToOutlet(a) && c->linksToOutlet(b))
             return c;
     }
@@ -493,7 +493,7 @@ bool MainContentComponent::saveLayoutToFile(String xmlFileName)
     
     // Serialize cables
     ValueTree cablesTree = ValueTree("cables");
-    for (auto cable: connections)  {
+    for (auto cable: cables)  {
         ValueTree child = cable->serialize();
         cablesTree.addChild(child, -1, nullptr);
     }
@@ -591,9 +591,9 @@ void MainContentComponent::clearLayout()
 {
     cout << "Clear the layout" << endl;
     // Delete all cables
-    for (auto cable: connections) {
+    for (auto cable: cables) {
         delete cable;
     }
-    connections.clear();
+    cables.clear();
     nodes.clearQuick(true);
 }

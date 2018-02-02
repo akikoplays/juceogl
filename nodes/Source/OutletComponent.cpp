@@ -67,7 +67,7 @@ void OutletComponent::mouseDoubleClick(const MouseEvent &event)
 {
 }
 
-bool OutletComponent::addCable(Connection *cable)
+bool OutletComponent::addCable(Cable *cable)
 {
     if (hasCable(cable))
         return false;
@@ -76,10 +76,10 @@ bool OutletComponent::addCable(Connection *cable)
     return true;
 }
 
-bool OutletComponent::removeCable(Connection *cable)
+bool OutletComponent::removeCable(Cable *cable)
 {
     for (auto it = cables.begin(); it != cables.end(); it++){
-        Connection *c = *it;
+        Cable *c = *it;
         if (c == cable) {
             cables.erase(it);
             return true;
@@ -93,7 +93,7 @@ void OutletComponent::removeAllCables()
     cables.clear();
 }
 
-bool OutletComponent::hasCable(Connection *cable)
+bool OutletComponent::hasCable(Cable *cable)
 {
     return std::find(cables.begin(), cables.end(), cable) != cables.end();
 }

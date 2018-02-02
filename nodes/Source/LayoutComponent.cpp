@@ -45,11 +45,11 @@ void LayoutComponent::paint (Graphics& g)
     // test absolute coords in Layout component when operating within viewport
     
     // Draw connections
-    std::vector<Connection*> connections = S::getInstance().mainComponent->getConnections();
+    std::vector<Cable*> connections = S::getInstance().mainComponent->getConnections();
     auto it = connections.begin();
     int i = 0;
     while (it != connections.end()){
-        Connection *conn = *it++;
+        Cable *conn = *it++;
         assert(conn);
         g.setColour(Colours::white);
         g.setOpacity(1.0f);

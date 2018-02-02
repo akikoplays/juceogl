@@ -12,7 +12,7 @@
 
 #include "../JuceLibraryCode/JuceHeader.h"
 
-class Connection;
+class Cable;
 class NodeComponent;
 class OutletDesc;
 
@@ -61,15 +61,15 @@ public:
     // Checks if this outlet's power rating is compatible with the given outlet's rating. Outlets may be of fixed or ranged voltage levels,
     // but it's only important that they overlap.
     bool isRatingCompatible(OutletComponent *outlet2);
-    bool addCable(Connection *cable);
+    bool addCable(Cable *cable);
     // Removes specific cable. Warning: doesn't deallocate it!
-    bool removeCable(Connection *cable);
+    bool removeCable(Cable *cable);
     // Removes all cables. Warning: doesn't deallocate them!
     void removeAllCables();
     // Returns list of cables for this outlet.
-    std::vector<Connection *> getCables();
+    std::vector<Cable *> getCables();
     // Check if this connection already inserted.
-    bool hasCable(Connection *cable);
+    bool hasCable(Cable *cable);
     // Returns true if outlet contains cables.
     bool isConnected(){return cables.size() > 0;};
     void signalize(Colour c, bool ena);
@@ -84,7 +84,7 @@ private:
     // Parent node component containing this outlet.
     NodeComponent *node;
     // Each connection established with the outlet is added to this vector.
-    std::vector<Connection *> cables;
+    std::vector<Cable *> cables;
     OutletParamBlock desc;
     // Pointer to Outlet descriptor as provided by Librarian, used for fast lookup
     OutletDesc *odesc;

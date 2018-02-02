@@ -18,9 +18,9 @@ class OutletComponent;
 
 using namespace std;
 
-class Connection : public Component {
+class Cable : public Component {
 public:
-    Connection(OutletComponent *_a, OutletComponent *_b, Uuid _uuid=Uuid::null())
+    Cable(OutletComponent *_a, OutletComponent *_b, Uuid _uuid=Uuid::null())
     {
         // When cable is loaded from layout file, Uuid is provided, otherwise it is calculated.
         if (_uuid.isNull())
@@ -34,7 +34,7 @@ public:
         cout << "connection created " + uuid.toString() << endl;
     };
     
-    ~Connection()
+    ~Cable()
     {
         cout << "connection destroyed " + uuid.toString() << endl;
     };
@@ -64,7 +64,7 @@ public:
 
 private:
     Uuid uuid;
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Connection)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Cable)
 };
 
 //==============================================================================
@@ -154,9 +154,9 @@ public:
     // Creates and registers new connection object.
     bool createConnection(OutletComponent *a, OutletComponent *b, Uuid uuid=nullptr);
     // Return list of cables.
-    std::vector<Connection*> getConnections() {return connections;};
+    std::vector<Cable*> getConnections() {return cables;};
     // Removes specific connection from vector, calls delete().
-    bool removeAndDeleteConnection(Connection *cable);
+    bool removeAndDeleteConnection(Cable *cable);
     // Remove and delete specific Node.
     void removeAndDeleteNode(NodeComponent *node);
     // Remove and delete selected nodes.
@@ -170,9 +170,9 @@ public:
     // Kill all node cables.
     void killAllCablesForNode(NodeComponent *node);
     // Returns a vector with all cables that are linked to this outlet.
-    std::vector<Connection *> getConnectionsLinkedToOutlet(OutletComponent *outlet);
+    std::vector<Cable *> getConnectionsLinkedToOutlet(OutletComponent *outlet);
     // Returns a cable connecting these two outlets.
-    Connection *getConnectionByOutlets(OutletComponent *a, OutletComponent *b);
+    Cable *getConnectionByOutlets(OutletComponent *a, OutletComponent *b);
     // Hide optionsCalloutBox, if there. If not - ignore.
     void hideOptionsCallout();
     // Add node to internal list.
@@ -208,7 +208,7 @@ private:
     ScopedPointer<LayoutComponent> layout;
     OwnedArray<NodeComponent> nodes;
     std::vector<NodeComponent*> selectedNodes;
-    std::vector<Connection*> connections;
+    std::vector<Cable*> cables;
     bool somethingIsBeingDraggedOver;
 
     //==============================================================================
