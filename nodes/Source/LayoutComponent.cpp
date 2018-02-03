@@ -45,10 +45,10 @@ void LayoutComponent::paint (Graphics& g)
     int gridsize = S::getGridSize();
     g.setColour(Colours::white);
     g.setOpacity(0.12f);
-    for (int x=15; x<getWidth(); x+=gridsize){
+    for (int x=0; x<getWidth(); x+=gridsize){
         g.drawLine(x, 0, x, getHeight());
     }
-    for (int y=15; y<getHeight();y+=gridsize){
+    for (int y=0; y<getHeight();y+=gridsize){
         g.drawLine(0, y, getWidth(),y);
     }
 

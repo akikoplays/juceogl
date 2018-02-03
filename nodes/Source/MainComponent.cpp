@@ -606,5 +606,5 @@ void MainContentComponent::resetLayout()
     }
     cables.clear();
     nodes.clearQuick(true);
-    forceRepaint = true;dw
+    forceRepaint = true;
 }
