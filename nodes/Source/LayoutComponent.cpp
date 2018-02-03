@@ -16,7 +16,7 @@
 
 using namespace std;
 
-#define NODE_SIZE Point<int>(90, 90)
+#define NODE_SIZE Point<int>(80, 80)
 
 //==============================================================================
 LayoutComponent::LayoutComponent()

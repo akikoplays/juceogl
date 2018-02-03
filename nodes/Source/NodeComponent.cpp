@@ -16,7 +16,7 @@
 
 using namespace std;
 
-#define OUTLET_SIZE Point<int>(10, 10)
+#define OUTLET_SIZE Point<int>(15, 15)
 
 //==============================================================================
 void SnapConstraint::applyBoundsToComponent (Component &component, Rectangle<int> bounds)
@@ -24,7 +24,7 @@ void SnapConstraint::applyBoundsToComponent (Component &component, Rectangle<int
     // Original code:
 //    component.setBounds (bounds);
     // Snap to grid code:
-    int grid = 20;
+    int grid = S::getGridSize();
     int x = bounds.getX() / grid * grid;
     int y = bounds.getY() / grid * grid;
     bounds.setX(x);
@@ -79,12 +79,17 @@ void NodeComponent::paint (Graphics& g)
     Point<int>outletSize = OUTLET_SIZE;
 
     auto r = getLocalBounds();
-    r.reduce(outletSize.x, outletSize.y);
+    //r.reduce(outletSize.x, outletSize.y);
     g.setColour(getLookAndFeel().findColour (ResizableWindow::backgroundColourId));
     g.fillRect(r);
 
-    g.setColour (selected ? Colours::white : Colours::grey);
+    g.setColour (selected ? Colours::white : Colours::darkgrey);
     g.drawRect (r, 1);   // draw an outline around the component
+
+    g.setColour(Colours::grey);
+    const float myDashLength[] = {3, 3};
+    g.drawDashedLine(Line<float>(OUTLET_SIZE.x, 1.0f, OUTLET_SIZE.x, getHeight()-1), &myDashLength[0], 2, 0.5, 0);
+    g.drawDashedLine(Line<float>(getWidth() - OUTLET_SIZE.x, 1.0f, getWidth() - OUTLET_SIZE.x, getHeight()-1), &myDashLength[0], 2, 0.5, 0);
 
     // Dynamically painted outlets based on their descriptors
     r = getLocalBounds();
@@ -113,7 +118,7 @@ void NodeComponent::paint (Graphics& g)
     }
     
     g.setColour (Colours::white);
-    g.setFont (12.0f);
+    g.setFont (8.0f);
     g.drawFittedText(desc->name, outletSize.x-4, 0, getWidth()-outletSize.x-10, getHeight(), Justification::verticallyCentred | Justification::horizontallyCentred, 3, 1.0);
 
 }
@@ -166,7 +171,7 @@ void NodeComponent::mouseDrag (const MouseEvent& e)
     // logic for multi dragging
     
     // Tiny movements don't start a drag
-    const int minimumMovementToStartDrag = 20;
+    const int minimumMovementToStartDrag = S::getGridSize();
     if (e.getDistanceFromDragStart() < minimumMovementToStartDrag)
         return;
     

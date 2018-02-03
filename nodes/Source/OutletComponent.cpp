@@ -28,9 +28,9 @@ OutletComponent::OutletComponent(NodeComponent* parent, OutletDesc *_odesc, Outl
     signalizing = false;
     signalState = false;
     if (direction == OutletParamBlock::Direction::SINK)
-        baseColor = Colours::green;
+        baseColor = Colour(0xffaaaaff);
     else
-        baseColor = Colours::blue;
+        baseColor = Colour(0xffffaaaa);
     activeColor = baseColor;
     node = parent;
     assert(node);
@@ -122,7 +122,11 @@ Point<int> OutletComponent::getWindowPos()
     auto r = node->getBoundsInParent();
     auto r2 = getBoundsInParent();
     
-    return Point<int>(r.getX() + r2.getX(), r.getY() + r2.getY() + getHeight()/2);
+//    return Point<int>(r.getX() + r2.getX(), r.getY() + r2.getY() + getHeight()/2);
+    if (isSink())
+        return Point<int>(r.getX() + r.getWidth(), r.getY() + r2.getY() + getHeight()/2);
+    else
+        return Point<int>(r.getX(), r.getY() + r2.getY() + getHeight()/2);
 }
 
 void OutletComponent::timerCallback()
