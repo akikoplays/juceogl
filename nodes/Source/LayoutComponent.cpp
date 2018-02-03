@@ -16,7 +16,7 @@
 
 using namespace std;
 
-#define NODE_SIZE Point<int>(100, 100)
+#define NODE_SIZE Point<int>(90, 90)
 
 //==============================================================================
 LayoutComponent::LayoutComponent()
@@ -41,38 +41,47 @@ void LayoutComponent::paint (Graphics& g)
 
     g.fillAll (Colours::black);   // clear the background
     
-    // TODO
-    // test absolute coords in Layout component when operating within viewport
-    
+    // Draw grid
+    int gridsize = S::getGridSize();
+    g.setColour(Colours::white);
+    g.setOpacity(0.12f);
+    for (int x=15; x<getWidth(); x+=gridsize){
+        g.drawLine(x, 0, x, getHeight());
+    }
+    for (int y=15; y<getHeight();y+=gridsize){
+        g.drawLine(0, y, getWidth(),y);
+    }
+
     // Draw connections
     std::vector<Cable*> connections = S::getInstance().mainComponent->getConnections();
     auto it = connections.begin();
-    int i = 0;
+    g.setColour(Colours::white);
+    g.setOpacity(1.0f);
+
     while (it != connections.end()){
         Cable *conn = *it++;
         assert(conn);
-        g.setColour(Colours::white);
-        g.setOpacity(1.0f);
-        float width = 1.0f;
         OutletComponent *a = conn->a;
         OutletComponent *b = conn->b;
         
+        if (a->isSink()) {
+            OutletComponent *tmp = b;
+            b = a;
+            a = tmp;
+        }
+            
         Point<int>apos = a->getWindowPos();
         Point<int>bpos = b->getWindowPos();
         
-        // Draw strain reliefs
-        // TODO optimize this!!
-        g.drawLine(apos.x, apos.y, a->getStrainReliefPos().x, a->getStrainReliefPos().y);
-        g.drawLine(bpos.x, bpos.y, b->getStrainReliefPos().x,  b->getStrainReliefPos().y);
-        
-        // Manhattan
-        apos = a->getStrainReliefPos();
-        bpos = b->getStrainReliefPos();
-        if ((apos.x == bpos.x) || (apos.y == bpos.y)) // Little speed up
-            g.drawLine(apos.x, apos.y, bpos.x, bpos.y, width);
-        else {
-            g.drawLine(apos.x, apos.y, bpos.x, apos.y, width);
-            g.drawLine(bpos.x, apos.y, bpos.x, bpos.y, width);
+        // New way of drawing cables - snap cables to grid
+        int sign = apos.x < bpos.x ? 1 : -1;
+        if (apos.y == bpos.y) {
+            g.drawLine(apos.x, apos.y, bpos.x, bpos.y);
+        } else {
+        int halfx = (abs(apos.x - bpos.x) / 2) * sign;
+            g.drawLine(apos.x, apos.y, apos.x + halfx, apos.y);
+            g.drawLine(apos.x+halfx, apos.y, apos.x + halfx, bpos.y);
+            g.drawLine(apos.x+halfx, bpos.y, bpos.x, bpos.y);
         }
     }
 
@@ -158,14 +167,18 @@ void LayoutComponent::setNodePosition(NodeComponent *node, int x, int y)
     Point<int> size = NODE_SIZE;
     node->setBounds(x, y,
                     size.x, size.y);
+    repaint();
 }
 
 void LayoutComponent::mouseDown(const MouseEvent& e)
 {
     if (e.mods.isRightButtonDown()){
         if (popupMenu.getNumItems() == 0) {
+            popupMenu.addSeparator();
             popupMenu.addItem (1, "Load layout");
             popupMenu.addItem (2, "Save layout");
+            popupMenu.addItem (3, "Reset layout");
+            popupMenu.addSeparator();
         }
         const int result = popupMenu.show();
         if (result == 0)
@@ -198,6 +211,11 @@ void LayoutComponent::mouseDown(const MouseEvent& e)
                 S::getMainComponent()->saveLayoutToFile(xmlFile.getFullPathName());
             }
         }
+        else if (result == 3) {
+            S::getConsole()->print("Popupmenu: Reset layout");
+            S::getMainComponent()->resetLayout();
+        }
+            
     } else {
         popupMenu.clear();
         popupMenu.dismissAllActiveMenus();

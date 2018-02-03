@@ -194,7 +194,7 @@ public:
     // Load layout from xml file and set it up on screen. This clears the existing layout.
     bool loadLayoutFromFile(String xmlFileName);
     // Clear the layout, deletes all Nodes, cables etc.
-    void clearLayout();
+    void resetLayout();
     // Return node from the nodes collection with the given uuid. Or nullptr if not found.
     NodeComponent *findNodeByUuid(Uuid uuid);
     // Return console.
@@ -217,6 +217,7 @@ private:
     std::vector<NodeComponent*> selectedNodes;
     std::vector<Cable*> cables;
     bool somethingIsBeingDraggedOver;
+    bool forceRepaint;
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainContentComponent)
@@ -241,6 +242,11 @@ public:
     static ConsoleComponent *getConsole()
     {
         return S::getMainComponent()->getConsole();
+    }
+    
+    static int getGridSize()
+    {
+        return 20;
     }
     
 private:

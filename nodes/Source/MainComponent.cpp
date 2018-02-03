@@ -114,7 +114,7 @@ void NodeOptionsComponent::resized()
 #pragma mark MainContentComponent
 
 MainContentComponent::MainContentComponent()
-: optionsCallout(nullptr), selectedOutletA(nullptr), selectedOutletB(nullptr), somethingIsBeingDraggedOver(false)
+: optionsCallout(nullptr), selectedOutletA(nullptr), selectedOutletB(nullptr), somethingIsBeingDraggedOver(false), forceRepaint(false)
 {
     // Sanity check
     S::getInstance().mainComponent = this;
@@ -139,12 +139,14 @@ MainContentComponent::MainContentComponent()
     
     // Main update timer used for animating elements on screen
     startTimerHz(50);
-    setSize(1000, 600);
+    
+    auto screenrect = Desktop::getInstance().getDisplays().getMainDisplay().totalArea;
+    setSize(screenrect.getWidth()*0.75, screenrect.getHeight()*0.75);
 }
 
 MainContentComponent::~MainContentComponent()
 {
-    clearLayout();
+    resetLayout();
 }
 
 
@@ -474,7 +476,10 @@ void MainContentComponent::resized()
 
 void MainContentComponent::timerCallback()
 {
-    
+    if (forceRepaint){
+        forceRepaint = false;
+        repaint();
+    }
 }
 
 void MainContentComponent::mouseDown (const MouseEvent& e)
@@ -522,7 +527,7 @@ bool MainContentComponent::loadLayoutFromFile(String xmlFileName)
     }
     
     // Evict existing layout
-    clearLayout();
+    resetLayout();
 
     ValueTree _layout = ValueTree(ValueTree::fromXml(*xml));
     String tmp = _layout.toXmlString();
@@ -566,7 +571,6 @@ bool MainContentComponent::loadLayoutFromFile(String xmlFileName)
         String outletB = _cable.getProperty("outletB").toString();
         String uuid = _cable.getProperty("uuid").toString();
 
-        // TODO
         // Identify outlets and recreate connections
         NodeComponent *node = findNodeByUuid(nodeA);
         assert(node);
@@ -579,8 +583,8 @@ bool MainContentComponent::loadLayoutFromFile(String xmlFileName)
         
         createConnection(outlet1, outlet2);
     }
-    repaint();
     
+    forceRepaint = true;
     return true;
 }
 
@@ -593,7 +597,7 @@ NodeComponent *MainContentComponent::findNodeByUuid(Uuid uuid)
     return nullptr;
 }
 
-void MainContentComponent::clearLayout()
+void MainContentComponent::resetLayout()
 {
     console->print("Reset layout");
     // Delete all cables
@@ -602,4 +606,5 @@ void MainContentComponent::clearLayout()
     }
     cables.clear();
     nodes.clearQuick(true);
+    forceRepaint = true;dw
 }

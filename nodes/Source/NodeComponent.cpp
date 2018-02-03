@@ -16,7 +16,7 @@
 
 using namespace std;
 
-#define OUTLET_SIZE Point<int>(15, 15)
+#define OUTLET_SIZE Point<int>(10, 10)
 
 //==============================================================================
 void SnapConstraint::applyBoundsToComponent (Component &component, Rectangle<int> bounds)

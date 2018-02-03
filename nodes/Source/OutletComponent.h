@@ -94,6 +94,8 @@ private:
     Colour baseColor;
     Colour activeColor;
     Point<int> windowPosition;
+    // Index of the outlet in Node (0,1,2,...)
+//    int index;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OutletComponent)
 };
