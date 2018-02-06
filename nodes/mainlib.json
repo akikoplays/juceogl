@@ -40,7 +40,7 @@
         }
   },
   "motor1" : {
-      "name" : "Stepper (220V)",
+      "name" : "Servo 220V",
       "outlets" : 
         {
           "in 220" : 
@@ -52,7 +52,7 @@
         }
   },
   "motor2" : {
-      "name" : "Stepper (300-400V)",
+      "name" : "Servo 300-400V",
       "outlets" : 
         {
           "in 220" : 
@@ -64,7 +64,7 @@
         }
   },
   "motor3" : {
-      "name" : "DC motor (12V)",
+      "name" : "DC motor 12V",
       "outlets" : 
         {
           "in 12" : 
@@ -87,9 +87,9 @@
             },
             "out 12" : 
             {
-              "type" : "dcbus",
-              "dir" : "out",
-              "rating" : 12
+                "type" : "dcbus",
+                "dir" : "out",
+                "rating" : 12
             }
 
         }
@@ -111,6 +111,37 @@
               "rating" : 400
             }
 
+        }
+  },
+  "stepup1" : {
+      "name" : "220V Stepup to 500V",
+      "outlets" : 
+        {
+          "in 220" : 
+            {
+              "type" : "bus",
+              "dir" : "in",
+              "rating" : 220
+            },
+            "out 500" : 
+            {
+              "type" : "bus",
+              "dir" : "out",
+              "rating" : 500
+            }
+
+        }
+  },
+    "cutter1" : {
+      "name" : "220-600V Cutter",
+      "outlets" : 
+        {
+          "in 600" : 
+            {
+              "type" : "bus",
+              "dir" : "in",
+              "rating" : [220,600]
+            }
         }
   }
 

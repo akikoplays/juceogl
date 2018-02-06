@@ -165,7 +165,8 @@ NodeComponent *LayoutComponent::createNode(String cdescstr, Uuid _uuid)
 void LayoutComponent::setNodePosition(NodeComponent *node, int x, int y)
 {
     Point<int> size = NODE_SIZE;
-    node->setBounds(x, y,
+    node->setBounds(x / S::getGridSize() * S::getGridSize(),
+                    y / S::getGridSize() * S::getGridSize(),
                     size.x, size.y);
     repaint();
 }
