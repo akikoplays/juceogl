@@ -317,7 +317,7 @@ void MainContentComponent::moveSelectedNodes(NodeComponent* chief, Point<int> de
     // TODO
     // Multi select drag is disabled becuase it's too damn buggy.
     
-    return;
+//    return;
     for (auto c: selectedNodes) {
         if (c == chief)
             continue;

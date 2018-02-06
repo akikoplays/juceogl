@@ -160,16 +160,32 @@ void NodeComponent::mouseUp (const MouseEvent& e)
 
 void NodeComponent::mouseDrag (const MouseEvent& e)
 {
+    auto prev = getBoundsInParent();
+    
     // Moves this Component according to the mouse drag event and applies our constraints to it
     dragger.dragComponent (this, e, &constrainer);
     S::getMainComponent()->repaint();
+
+    auto next = getBoundsInParent();
+    cout << "prev " << prev.getX() << ", " << prev.getY() <<
+    " next: " << next.getX() << ", " << next.getY() << endl;
+
+    if ((next.getX() == prev.getX()) && (next.getY() == prev.getY()))
+        return;
+
+    Point<int>delta(next.getX() - prev.getX(),
+                    next.getY() - prev.getY());
+    S::getMainComponent()->moveSelectedNodes(this, delta);
+    
+    MouseEvent re (e.getEventRelativeTo(S::getMainComponent()));
+    S::getMainComponent()->getViewport().autoScroll(re.x, re.y, 10,8);
 
     // TODO
     // fix multi drag when snapping on! constrainer is snapgridconstrainer, so the movement is quantized
     
     // TODO
     // logic for multi dragging
-    
+/*
     // Tiny movements don't start a drag
     const int minimumMovementToStartDrag = S::getGridSize();
     if (e.getDistanceFromDragStart() < minimumMovementToStartDrag)
@@ -181,6 +197,7 @@ void NodeComponent::mouseDrag (const MouseEvent& e)
     
     MouseEvent re (e.getEventRelativeTo(S::getMainComponent()));
     S::getMainComponent()->getViewport().autoScroll(re.x, re.y, 10,8);
+*/
 }
 
 void NodeComponent::mouseDoubleClick(const MouseEvent &event)
