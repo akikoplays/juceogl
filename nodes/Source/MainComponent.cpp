@@ -314,10 +314,7 @@ Rectangle<int> MainContentComponent::getAreaOfSelectedNodes()
 
 void MainContentComponent::moveSelectedNodes(NodeComponent* chief, Point<int> delta)
 {
-    // TODO
-    // Multi select drag is disabled becuase it's too damn buggy.
-    
-//    return;
+
     for (auto c: selectedNodes) {
         if (c == chief)
             continue;

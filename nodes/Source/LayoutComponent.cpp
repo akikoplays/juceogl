@@ -223,3 +223,15 @@ void LayoutComponent::mouseDown(const MouseEvent& e)
         S::getMainComponent()->deselectAll();
     }
 }
+
+void LayoutComponent::mouseDoubleClick(const MouseEvent &event)
+{
+    // TODO:
+    // current zoom out zoom in, still WIP
+    if (getTransform().isIdentity()) {
+        setTransform(AffineTransform::scale(0.5, 0.5));
+    } else {
+        setTransform(AffineTransform::identity);
+    }
+    repaint();
+}

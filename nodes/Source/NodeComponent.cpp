@@ -143,6 +143,10 @@ void NodeComponent::mouseDown (const MouseEvent& e)
     if (!e.mods.isShiftDown()) {
         S::getMainComponent()->deselectAll();
     }
+    
+    if (selected)
+        return;
+    
     select();
     S::getInstance().getMainComponent()->selectNode(this);
 
@@ -179,25 +183,6 @@ void NodeComponent::mouseDrag (const MouseEvent& e)
     
     MouseEvent re (e.getEventRelativeTo(S::getMainComponent()));
     S::getMainComponent()->getViewport().autoScroll(re.x, re.y, 10,8);
-
-    // TODO
-    // fix multi drag when snapping on! constrainer is snapgridconstrainer, so the movement is quantized
-    
-    // TODO
-    // logic for multi dragging
-/*
-    // Tiny movements don't start a drag
-    const int minimumMovementToStartDrag = S::getGridSize();
-    if (e.getDistanceFromDragStart() < minimumMovementToStartDrag)
-        return;
-    
-    Point<int> delta = e.getEventRelativeTo(this).getPosition() - mouseDownWithinTarget;
-    //cout << "delta drag: " << delta.x << ", " << delta.y << endl;
-    S::getMainComponent()->moveSelectedNodes(this, delta);
-    
-    MouseEvent re (e.getEventRelativeTo(S::getMainComponent()));
-    S::getMainComponent()->getViewport().autoScroll(re.x, re.y, 10,8);
-*/
 }
 
 void NodeComponent::mouseDoubleClick(const MouseEvent &event)
