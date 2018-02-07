@@ -20,7 +20,8 @@ class NodeComponent;
 */
 class LayoutComponent    :  public Component,
                             public DragAndDropTarget,
-                            public DragAndDropContainer
+                            public DragAndDropContainer,
+                            private KeyListener
 
 {
 public:
@@ -31,6 +32,9 @@ public:
     void resized() override;
     void mouseDown (const MouseEvent& e) override;
     void mouseDoubleClick(const MouseEvent &event) override;
+//    void mouseWheelMove (const MouseEvent&, const MouseWheelDetails&) override;
+//    bool keyPressed (const KeyPress& key) override;
+    bool keyPressed (const KeyPress& key, Component* originatingComponent);
 
     bool isInterestedInDragSource (const SourceDetails& /*dragSourceDetails*/) override;
     void itemDragEnter (const SourceDetails& /*dragSourceDetails*/) override;
@@ -45,6 +49,7 @@ public:
     
 private:
     PopupMenu popupMenu;
+    float scale;
     bool somethingIsBeingDraggedOver;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LayoutComponent)
 };

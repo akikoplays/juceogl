@@ -131,6 +131,14 @@ void NodeComponent::resized()
 
 }
 
+/*
+ Whats the selection logic?
+ 
+ on mouseDown and no shift: deselect all, select node
+ on mouseDown and shift: select node+
+ on mouseUp after drag: keep selection
+*/
+
 void NodeComponent::mouseDown (const MouseEvent& e)
 {
     // Node options are shown on RMB
@@ -138,9 +146,9 @@ void NodeComponent::mouseDown (const MouseEvent& e)
         S::getInstance().getMainComponent()->selectNode(this, true);
         return;
     }
-    
+
     // Select node
-    if (!e.mods.isShiftDown()) {
+    if (!e.mods.isShiftDown() && S::getMainComponent()->getSelectedNodes().size() == 1) {
         S::getMainComponent()->deselectAll();
     }
     
@@ -149,7 +157,7 @@ void NodeComponent::mouseDown (const MouseEvent& e)
     
     select();
     S::getInstance().getMainComponent()->selectNode(this);
-
+    
     // Prepares our dragger to drag this Component
     mouseDownWithinTarget = e.getEventRelativeTo(this).getMouseDownPosition();
     dragger.startDraggingComponent (this, e);

@@ -342,6 +342,11 @@ void MainContentComponent::moveSelectedNodes(NodeComponent* chief, Point<int> de
     }
 }
 
+std::vector<NodeComponent*> MainContentComponent::getSelectedNodes()
+{
+    return selectedNodes;
+}
+
 std::vector<Cable *> MainContentComponent::getConnectionsLinkedToOutlet(OutletComponent *outlet)
 {
     std::vector<Cable *> list;

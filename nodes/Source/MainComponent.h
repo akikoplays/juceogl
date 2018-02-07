@@ -150,6 +150,8 @@ public:
     Rectangle<int> getAreaOfSelectedNodes();
     // Move all selected nodes by delta value.
     void moveSelectedNodes(NodeComponent *chief, Point<int> delta);
+    // Get list of selected nodes.
+    std::vector<NodeComponent*> getSelectedNodes();
     // Validates connection following predefined set of rules, and returns true if it's ok.
     ValidationResult validateConnection(OutletComponent *a, OutletComponent *b);
     // Creates and registers new connection object.

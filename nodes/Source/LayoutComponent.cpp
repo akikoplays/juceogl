@@ -23,7 +23,9 @@ LayoutComponent::LayoutComponent()
 {
     // In your constructor, you should add any child components, and
     // initialise any special settings that your component needs.
-
+    scale = 1.0f;
+    addKeyListener(this);
+    setWantsKeyboardFocus(true);
 }
 
 LayoutComponent::~LayoutComponent()
@@ -93,7 +95,6 @@ void LayoutComponent::resized()
     // components that your component contains..
     // This method is where you should set the bounds of any child
     // components that your component contains..
-    
 }
 
 //==============================================================================
@@ -235,3 +236,37 @@ void LayoutComponent::mouseDoubleClick(const MouseEvent &event)
     }
     repaint();
 }
+
+//bool LayoutComponent::keyPressed(const KeyPress& key)
+bool LayoutComponent::keyPressed (const KeyPress& key, Component* originatingComponent)
+{
+    if (key == KeyPress ('-', ModifierKeys::ctrlModifier, 0))
+    {
+        scale -= 0.1f;
+        scale = scale > 2.0f ? 2.0f : scale < 0.2f ? 0.2f : scale;
+        setTransform(AffineTransform::scale(scale, scale));
+        return true;
+    }
+    if (key == KeyPress ('=', ModifierKeys::ctrlModifier, 0))
+    {
+        scale += 0.1f;
+        scale = scale > 2.0f ? 2.0f : scale < 0.2f ? 0.2f : scale;
+        setTransform(AffineTransform::scale(scale, scale));
+        return true;
+    }
+
+    return false;
+}
+
+/*
+void LayoutComponent::mouseWheelMove (const MouseEvent &event, const MouseWheelDetails &details)
+{
+    if (!event.mods.isCtrlDown()) {
+        return;
+    }
+    static float scale = 1.0f;
+    scale -= details.deltaY;
+    scale = scale > 2.0f ? 2.0f : scale < 0.2f ? 0.2f : scale;
+    setTransform(AffineTransform::scale(scale, scale));
+}
+*/
