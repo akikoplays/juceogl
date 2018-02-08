@@ -144,6 +144,8 @@ public:
     void selectOutlet(OutletComponent *outlet, bool options = false);
     // Selects node, opens options callout if options = true.
     void selectNode(NodeComponent *node, bool options = false);
+    // Deselects node.
+    void deselectNode(NodeComponent *node);
     // Deselect nodes and outlets.
     void deselectAll();
     // Get area of all selected nodes.
@@ -191,6 +193,10 @@ public:
     {
         return viewport;
     }
+    LayoutComponent *getLayout()
+    {
+        return layout;
+    }
     // Save current layout to xml file, filename contains absolute path.
     bool saveLayoutToFile(String xmlFileName);
     // Load layout from xml file and set it up on screen. This clears the existing layout.
@@ -204,6 +210,8 @@ public:
     {
         return console;
     }
+    const OwnedArray<NodeComponent> &getNodes();
+    
 private:
     // First viewport that contains LayoutComponent
     Viewport viewport;

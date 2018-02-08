@@ -155,11 +155,10 @@ void NodeComponent::mouseDown (const MouseEvent& e)
     if (selected)
         return;
     
-    select();
     S::getInstance().getMainComponent()->selectNode(this);
     
     // Prepares our dragger to drag this Component
-    mouseDownWithinTarget = e.getEventRelativeTo(this).getMouseDownPosition();
+//    mouseDownWithinTarget = e.getEventRelativeTo(this).getMouseDownPosition();
     dragger.startDraggingComponent (this, e);
 }
 
@@ -179,8 +178,8 @@ void NodeComponent::mouseDrag (const MouseEvent& e)
     S::getMainComponent()->repaint();
 
     auto next = getBoundsInParent();
-    cout << "prev " << prev.getX() << ", " << prev.getY() <<
-    " next: " << next.getX() << ", " << next.getY() << endl;
+//    cout << "prev " << prev.getX() << ", " << prev.getY() <<
+//    " next: " << next.getX() << ", " << next.getY() << endl;
 
     if ((next.getX() == prev.getX()) && (next.getY() == prev.getY()))
         return;
@@ -221,6 +220,8 @@ OutletComponent *NodeComponent::getOutletByName(String name)
 
 void NodeComponent::select()
 {
+    if (selected)
+        return;
     S::getConsole()->print("Node selected.");
     selected = true;
     repaint();
@@ -228,6 +229,8 @@ void NodeComponent::select()
 
 void NodeComponent::deselect()
 {
+    if (!selected)
+        return;
     S::getConsole()->print("Node deselected.");
     selected = false;
     repaint();

@@ -224,13 +224,26 @@ void MainContentComponent::selectNode(NodeComponent *node, bool options)
 {
     // If node was double clicked, we want to show options callout.
     if (options) {
-        cout << "Dblclick, going into options mode" << endl;
+        cout << "Going into options mode" << endl;
         showNodeOptions(node);
         return;
     }
-    // TODO:
-    // implement node selection logic
     selectedNodes.push_back(node);
+    node->select();
+}
+
+void MainContentComponent::deselectNode(NodeComponent *node)
+{
+    auto it = selectedNodes.begin();
+    for (auto n: selectedNodes) {
+        if (node != n){
+            it++;
+            continue;
+        }
+        node->deselect();
+        selectedNodes.erase(it);
+        break;
+    }
 }
 
 void MainContentComponent::selectOutlet(OutletComponent *outlet, bool options)
@@ -314,11 +327,14 @@ Rectangle<int> MainContentComponent::getAreaOfSelectedNodes()
 
 void MainContentComponent::moveSelectedNodes(NodeComponent* chief, Point<int> delta)
 {
+    cout << "Delta: " + delta.toString() << endl;
 
-    for (auto c: selectedNodes) {
+    cout << "# selected nodes: " << selectedNodes.size() << endl;
+    auto it = selectedNodes.begin();
+    for (it=selectedNodes.begin(); it != selectedNodes.end(); it++) {
+        auto c = *it;
         if (c == chief)
             continue;
-        
         // Constrain to limits
         auto targetArea = getAreaOfSelectedNodes() + delta;
         auto limit = chief->getParentComponent()->getBounds();
@@ -336,6 +352,8 @@ void MainContentComponent::moveSelectedNodes(NodeComponent* chief, Point<int> de
         if (targetArea.getRight() > limit.getRight())
             delta.x -= targetArea.getRight() - limit.getRight();
         
+        cout << "- " << c->getName() << ": DeltaAfter: " + delta.toString() << endl;
+
         Rectangle<int> bounds (c->getBounds());
         bounds += delta;
         c->setBounds(bounds);
@@ -609,4 +627,9 @@ void MainContentComponent::resetLayout()
     cables.clear();
     nodes.clearQuick(true);
     forceRepaint = true;
+}
+
+const OwnedArray<NodeComponent> &MainContentComponent::getNodes()
+{
+    return nodes;
 }
