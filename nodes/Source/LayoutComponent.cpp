@@ -237,7 +237,6 @@ void LayoutComponent::mouseDoubleClick(const MouseEvent &event)
     repaint();
 }
 
-//bool LayoutComponent::keyPressed(const KeyPress& key)
 bool LayoutComponent::keyPressed (const KeyPress& key, Component* originatingComponent)
 {
     if (key == KeyPress ('-', ModifierKeys::ctrlModifier, 0))
@@ -258,15 +257,18 @@ bool LayoutComponent::keyPressed (const KeyPress& key, Component* originatingCom
     return false;
 }
 
-/*
+#ifdef USE_MOUSEWHEEL_TO_ZOOM
 void LayoutComponent::mouseWheelMove (const MouseEvent &event, const MouseWheelDetails &details)
 {
-    if (!event.mods.isCtrlDown()) {
+    if (!event.mods.isCtrlDown() && !event.mods.isAltDown()) {
+        int curX = S::getMainComponent()->getViewport().getViewPositionX();
+        int curY = S::getMainComponent()->getViewport().getViewPositionY();
+        S::getMainComponent()->getViewport().setViewPosition(curX - details.deltaX*200.0f, curY - details.deltaY*200.0f);
         return;
     }
     static float scale = 1.0f;
-    scale -= details.deltaY;
+    scale -= details.deltaY*0.5;
     scale = scale > 2.0f ? 2.0f : scale < 0.2f ? 0.2f : scale;
     setTransform(AffineTransform::scale(scale, scale));
 }
-*/
+#endif

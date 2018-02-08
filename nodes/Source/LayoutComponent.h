@@ -11,6 +11,7 @@
 #pragma once
 
 #include "../JuceLibraryCode/JuceHeader.h"
+#include "config.h"
 
 class ComponentDesc;
 class NodeComponent;
@@ -32,8 +33,9 @@ public:
     void resized() override;
     void mouseDown (const MouseEvent& e) override;
     void mouseDoubleClick(const MouseEvent &event) override;
-//    void mouseWheelMove (const MouseEvent&, const MouseWheelDetails&) override;
-//    bool keyPressed (const KeyPress& key) override;
+#ifdef USE_MOUSEWHEEL_TO_ZOOM
+    void mouseWheelMove (const MouseEvent&, const MouseWheelDetails&) override;
+#endif
     bool keyPressed (const KeyPress& key, Component* originatingComponent);
 
     bool isInterestedInDragSource (const SourceDetails& /*dragSourceDetails*/) override;
@@ -44,11 +46,14 @@ public:
 
     // Creates node based on provided component descriptor. Makes it visible and adds it to the scene.
     NodeComponent *createNode(ComponentDesc *cdesc, Uuid _uuid = Uuid::null());
+    // Creates node based on provided librarian ID (name of the component as stored in the librarian database). Makes it visible and adds it to the scene.
     NodeComponent *createNode(String cdescstr, Uuid _uuid = Uuid::null());
+    // Positions node on the layout.
     void setNodePosition(NodeComponent *node, int x, int y);
     
 private:
     PopupMenu popupMenu;
+    // Layout zoom factor. Controlled by -/+ and or mousewheel if (USE_MOUSEWHEEL_TO_ZOOM) is defined.
     float scale;
     bool somethingIsBeingDraggedOver;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LayoutComponent)

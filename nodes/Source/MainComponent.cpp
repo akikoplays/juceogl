@@ -473,7 +473,7 @@ void MainContentComponent::resized()
 //    layout->setBounds(r);
     viewport.setBounds(r);
     // TODO provisionally lets set this to some insane size
-    layout->setBounds(0,0,2048,2048);
+    layout->setBounds(0,0,2048*4,2048*4);
 }
 
 void MainContentComponent::timerCallback()
