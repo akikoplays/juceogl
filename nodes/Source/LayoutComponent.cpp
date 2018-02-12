@@ -177,9 +177,10 @@ void LayoutComponent::mouseDown(const MouseEvent& e)
     if (e.mods.isRightButtonDown()){
         if (popupMenu.getNumItems() == 0) {
             popupMenu.addSeparator();
-            popupMenu.addItem (1, "Load layout");
-            popupMenu.addItem (2, "Save layout");
-            popupMenu.addItem (3, "Reset layout");
+            popupMenu.addItem(1, "Load layout");
+            popupMenu.addItem(2, "Save layout");
+            popupMenu.addItem(3, "Reset layout");
+            popupMenu.addItem(4, "Save layout to image");
             popupMenu.addSeparator();
         }
         const int result = popupMenu.show();
@@ -216,6 +217,22 @@ void LayoutComponent::mouseDown(const MouseEvent& e)
         else if (result == 3) {
             S::getConsole()->print("Popupmenu: Reset layout");
             S::getMainComponent()->resetLayout();
+        } else if (result == 4) {
+            // Code taken from JUCE forum:
+            // https://forum.juce.com/t/rendering-window-contents-to-image-file/12820/7
+            
+            Component *comp = this;
+            File thumbFile = File::getSpecialLocation (File::userDesktopDirectory).getChildFile ("snapshot.png");
+            Image snapShot = comp->createComponentSnapshot (comp->getLocalBounds());
+//            Image thumbnail = snapShot.rescaled (2048, 2048 * comp->getHeight() / comp->getWidth());
+            
+            // copied from jules' posting above:
+            if (ImageFileFormat* format = ImageFileFormat::findImageFormatForFileExtension (thumbFile))
+            {
+                FileOutputStream out (thumbFile);
+                if (out.openedOk())
+                    format->writeImageToStream (snapShot, out);
+            }
         }
             
     } else {
