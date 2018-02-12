@@ -87,6 +87,15 @@ void LayoutComponent::paint (Graphics& g)
         }
     }
 
+    if (areaSelecting) {
+//        cout << "Selecting " << areaSelectionCorner1.x << ", " << areaSelectionCorner1.y << " to " << areaSelectionCorner2.x << ", " << areaSelectionCorner2.y << endl;
+        g.setColour(Colours::grey);
+        int x1 = min(areaSelectionCorner1.x, areaSelectionCorner2.x);
+        int x2 = max(areaSelectionCorner1.x, areaSelectionCorner2.x);
+        int y1 = min(areaSelectionCorner1.y, areaSelectionCorner2.y);
+        int y2 = max(areaSelectionCorner1.y, areaSelectionCorner2.y);
+        g.drawRect(x1, y1, x2-x1, y2-y1);
+    }
 }
 
 void LayoutComponent::resized()
@@ -239,7 +248,51 @@ void LayoutComponent::mouseDown(const MouseEvent& e)
         popupMenu.clear();
         popupMenu.dismissAllActiveMenus();
         S::getMainComponent()->deselectAll();
+        
+//        cout << "Area Selecting true" << endl;
+        areaSelecting = true;
+        areaSelectionCorner1 = e.getMouseDownPosition();
     }
+}
+
+void LayoutComponent::mouseUp(const MouseEvent& e)
+{
+//    cout << "Area Selecting false" << endl;
+    areaSelecting = false;
+    repaint();
+}
+
+void LayoutComponent::mouseDrag(const MouseEvent &e)
+{
+    areaSelectionCorner2 = e.getPosition();
+
+    // Selected area, sorted
+    int x1 = min(areaSelectionCorner1.x, areaSelectionCorner2.x);
+    int x2 = max(areaSelectionCorner1.x, areaSelectionCorner2.x);
+    int y1 = min(areaSelectionCorner1.y, areaSelectionCorner2.y);
+    int y2 = max(areaSelectionCorner1.y, areaSelectionCorner2.y);
+    int w = x2-x1;
+    int h = y2-y1;
+    Rectangle<int> selection(x1, y1, w, h);
+    
+    cout << "---" << endl;
+    cout << selection.toString() << endl;
+    const OwnedArray<NodeComponent> &nodes = S::getMainComponent()->getNodes();
+    for (int i=0; i<nodes.size(); i++) {
+        auto rect = nodes[i]->getBoundsInParent();
+        
+        bool overlap = false;
+        if (x1 < rect.getX()+rect.getWidth() && x1+w > rect.getX() &&
+            y1 < rect.getY()+rect.getHeight() && y1+h > rect.getY())
+            overlap = true;
+        cout << "Node: " << nodes[i]->getName() << " overlaps: " << overlap << endl;
+        cout << rect.toString() << endl;
+        if (overlap)
+            S::getMainComponent()->selectNode(nodes[i]);
+        else
+            S::getMainComponent()->deselectNode(nodes[i]);
+    }
+    repaint();
 }
 
 void LayoutComponent::mouseDoubleClick(const MouseEvent &event)

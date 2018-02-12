@@ -32,6 +32,8 @@ public:
     void paint (Graphics&) override;
     void resized() override;
     void mouseDown (const MouseEvent& e) override;
+    void mouseUp (const MouseEvent& e) override;
+    void mouseDrag(const MouseEvent &e) override;
     void mouseDoubleClick(const MouseEvent &event) override;
 #ifdef USE_MOUSEWHEEL_TO_ZOOM
     void mouseWheelMove (const MouseEvent&, const MouseWheelDetails&) override;
@@ -56,5 +58,8 @@ private:
     // Layout zoom factor. Controlled by -/+ and or mousewheel if (USE_MOUSEWHEEL_TO_ZOOM) is defined.
     float scale;
     bool somethingIsBeingDraggedOver;
+    bool areaSelecting;
+    Point<int> areaSelectionCorner1;
+    Point<int> areaSelectionCorner2;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LayoutComponent)
 };

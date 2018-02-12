@@ -57,7 +57,7 @@ private:
     SnapConstraint constrainer;
     Uuid uuid;
     ComponentDesc *desc;
-    Point<int> mouseDownWithinTarget;
+//    Point<int> mouseDownWithinTarget;
     bool selected;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NodeComponent)
 };
